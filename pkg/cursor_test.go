@@ -3,7 +3,7 @@ package lada
 import (
 	"errors"
 	"fmt"
-	"github.com/kodemore/lada/mock"
+	"github.com/kodemore/lada/pkg/mock"
 	"github.com/stretchr/testify/assert"
 	"io"
 	"os"

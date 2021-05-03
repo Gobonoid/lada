@@ -8,8 +8,8 @@ import (
 func TestLadaError(t *testing.T) {
 	t.Run("Test can create new CliIoReadError", func(t *testing.T) {
 		testCause := errors.New("test")
-		err := CliIoReadError.causedBy(testCause)
-		if !errors.Is(err, CliIoReadError) {
+		err := IoReaderError.causedBy(testCause)
+		if !errors.Is(err, IoReaderError) {
 			t.Error("CliIoReadError.Is(CliIoReadError) should be true")
 		}
 	})

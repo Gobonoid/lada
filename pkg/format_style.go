@@ -14,14 +14,14 @@ var formatStyleNames = map[FormatStyle]string {
 }
 
 var FormatStyles = struct {
-	BOLD FormatStyle
-	DIM FormatStyle
-	ITALIC FormatStyle
+	BOLD      FormatStyle
+	DIM       FormatStyle
+	ITALIC    FormatStyle
 	UNDERLINE FormatStyle
-	BLINK FormatStyle
-	INVERT FormatStyle
-	HIDDEN FormatStyle
-	STRIKE FormatStyle
+	BLINK     FormatStyle
+	INVERT    FormatStyle
+	HIDDEN    FormatStyle
+	STRIKE    FormatStyle
 }{
 	BOLD: 1,
 	DIM: 2,

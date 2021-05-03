@@ -7,7 +7,6 @@ import (
 	"testing"
 )
 
-
 func UseIoWriterMock(t *testing.T, f func(writer *os.File)) io.Writer {
 	file, err := ioutil.TempFile("/tmp", "output.*.txt")
 	defer os.Remove(file.Name())
@@ -18,7 +17,6 @@ func UseIoWriterMock(t *testing.T, f func(writer *os.File)) io.Writer {
 	f(file)
 	return file
 }
-
 
 func UseInvalidIoWriterMock(t *testing.T, f func(writer *os.File)) io.Writer {
 	file, err := ioutil.TempFile("/tmp", "output.*.txt")

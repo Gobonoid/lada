@@ -23,23 +23,23 @@ var formatColorNames = map[FormatColor]string {
 }
 
 var FormatColors = struct {
-	DEFAULT FormatColor
-	BLACK FormatColor
-	RED FormatColor
-	GREEN FormatColor
-	YELLOW FormatColor
-	BLUE FormatColor
-	MAGENTA FormatColor
-	CYAN FormatColor
-	LIGHTGRAY FormatColor
-	DARKGRAY FormatColor
-	LIGHTRED FormatColor
-	LIGHTGREEN FormatColor
-	LIGHTYELLOW FormatColor
-	LIGHTBLUE FormatColor
+	DEFAULT      FormatColor
+	BLACK        FormatColor
+	RED          FormatColor
+	GREEN        FormatColor
+	YELLOW       FormatColor
+	BLUE         FormatColor
+	MAGENTA      FormatColor
+	CYAN         FormatColor
+	LIGHTGRAY    FormatColor
+	DARKGRAY     FormatColor
+	LIGHTRED     FormatColor
+	LIGHTGREEN   FormatColor
+	LIGHTYELLOW  FormatColor
+	LIGHTBLUE    FormatColor
 	LIGHTMAGENTA FormatColor
-	LIGHTCYAN FormatColor
-	WHITE FormatColor
+	LIGHTCYAN    FormatColor
+	WHITE        FormatColor
 
 }{
 	DEFAULT: 39,
