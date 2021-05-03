@@ -44,57 +44,70 @@ func NewCursor(writer io.Writer) (*Cursor, error) {
 	}, nil
 }
 
-func (c *Cursor) updatePosition(text string) {
+func (c *Cursor) Line() int {
+	return c.line
+}
+
+func (c *Cursor) Column() int {
+	return c.column
+}
+
+func (c *Cursor) updatePosition(text string) (int, int) {
 	split := strings.Split(text, "\n")
 
 	c.line += len(split)
 	c.column += len(split[len(split) - 1])
+
+	return c.column, c.line
 }
 
-func (c *Cursor) MoveToNextLine() error {
+func (c *Cursor) MoveToNextLine() (int, error) {
 	if _, err := fmt.Fprintf(c.writer, CursorNextLine, 1); err != nil {
-		return CursorOperationError.causedBy(err)
+		return c.line, CursorOperationError.causedBy(err)
 	}
 	c.line += 1
-	return nil
+	return c.line, nil
 }
 
-func (c *Cursor) MoveToPreviousLine() error {
+func (c *Cursor) MoveToPreviousLine() (int, error) {
 	if c.line <= 1 {
-		return CursorOperationError.causedBy(CursorOutOfReachError)
+		return c.line, CursorOperationError.causedBy(CursorOutOfReachError)
 	}
 
 	if _, err := fmt.Fprintf(c.writer, CursorPreviousLine, 1); err != nil {
-		return CursorOperationError.causedBy(err)
+		return c.line, CursorOperationError.causedBy(err)
 	}
 	c.line -= 1
-	return nil
+	return c.line, nil
 }
 
-func (c *Cursor) MoveForward(n int) error {
+func (c *Cursor) MoveForward(n int) (int, error) {
 	if _, err := fmt.Fprintf(c.writer, CursorForward, n); err != nil {
-		return CursorOperationError.causedBy(err)
+		return c.column, CursorOperationError.causedBy(err)
 	}
 	c.column += n
-	return nil
+	return c.column, nil
 }
 
-func (c *Cursor) MoveBackward(n int) error {
+func (c *Cursor) MoveBackward(n int) (int, error) {
 	if _, err := fmt.Fprintf(c.writer, CursorBackward, n); err != nil {
-		return CursorOperationError.causedBy(err)
+		return c.column, CursorOperationError.causedBy(err)
 	}
 	c.column -= n
 	if c.column < 1 {
 		c.column = 1
 	}
 
-	return nil
+	return c.column, nil
 }
 
-func (c *Cursor) MoveUp(n int) error {
+func (c *Cursor) MoveUp(n int) (int, error) {
 	if c.line - n < 1 {
-		return CursorOperationError.causedBy(CursorOutOfReachError)
+		return c.line, CursorOperationError.causedBy(CursorOutOfReachError)
+	}
+	if _, err := fmt.Fprintf(c.writer, CursorUp, n); err != nil {
+		return c.line, CursorOperationError.causedBy(err)
 	}
 
-	return nil
+	return c.line, nil
 }

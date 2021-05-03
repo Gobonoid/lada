@@ -33,3 +33,33 @@ func TestNewCursor(t *testing.T) {
 		})
 	})
 }
+
+
+func TestCursor_MoveForward(t *testing.T) {
+	t.Run("can move cursor forward", func(t *testing.T) {
+		mock.UseIoWriterMock(t, func(writer *os.File) {
+			cursor, _ := NewCursor(writer)
+			cursor.MoveForward(1)
+
+			writer.Seek(0, 0)
+			contents, _ := io.ReadAll(writer)
+			expected := fmt.Sprintf(CursorNextLine, 1) + fmt.Sprintf(CursorForward, 1)
+			assert.Equal(t, expected, string(contents))
+			assert.Equal(t, 2, cursor.Column())
+		})
+	})
+}
+
+func TestCursor_MoveBackward(t *testing.T) {
+	t.Run("can move cursor forward", func(t *testing.T) {
+		mock.UseIoWriterMock(t, func(writer *os.File) {
+			cursor, _ := NewCursor(writer)
+			cursor.MoveBackward(1)
+
+			writer.Seek(0, 0)
+			contents, _ := io.ReadAll(writer)
+			expected := fmt.Sprintf(CursorNextLine, 1) + fmt.Sprintf(CursorBackward, 1)
+			assert.Equal(t, expected, string(contents))
+		})
+	})
+}
