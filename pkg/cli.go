@@ -22,6 +22,7 @@ type Handler func(args Arguments, params Parameters, flags Flags)
 
 type Command struct {
 	Handler Handler
+	Name string
 	Arguments Arguments
 	Parameters Parameters
 	Flags Flags
@@ -62,9 +63,29 @@ func (c *Command) Run() error {
 	return nil
 }
 
-func Parse(commandString string) []string {
+func Parse(commandString string) (string, []string, []string, []string) {
 	r := "^(?P<subcommands>(?P<subcommand>\\s*[a-z-_:]+)+)(?P<arguments>(?P<argument>\\s+\\$[a-z]+)*)(?P<parameters>(?P<parameter>\\s*\\-\\-[a-z]+\\s*\\=\\s*[^-]*)*)(?P<flags>(?P<flag>\\s*\\-\\-[a-z]+\\s*\\?)*)$"
 	re := regexp.MustCompile(r)
-	// [Todo] split into command, args, params, flags before returning
-	return re.FindStringSubmatch(commandString)
+	matches := re.FindStringSubmatch(commandString)
+
+	var (
+		command string
+		args []string
+		params []string
+		flags []string
+	)
+
+	for key, typeName := range re.SubexpNames() {
+		switch typeName {
+			case "subcommand":
+				command = matches[key]
+			case "argument":
+				args = append(args, matches[key])
+			case "parameter":
+				params = append(params, matches[key])
+			case "flag":
+				flags = append(flags, matches[key])
+		}
+	}
+	return command, args, params, flags
 }

@@ -30,6 +30,9 @@ func TestAddCommand(t *testing.T) {
 
 func TestParse(t *testing.T) {
 	commandString := "subcommand adsasd $input $output --num=1 --flavour= --word=default --verbose? --flag?"
-	tokens := Parse(commandString)
-	assert.Len(t, tokens, 9)
+	command, args, params, flags := Parse(commandString)
+	assert.Equal(t, "adsasd", command)
+	assert.Len(t, args, 2)
+	assert.Len(t, params, 2)
+	assert.Len(t, flags, 2)
 }
