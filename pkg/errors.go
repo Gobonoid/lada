@@ -25,7 +25,7 @@ func (e ladaError) Cause() error {
 }
 
 func (e ladaError) Is(other error) bool {
-	otherError, ok := other.(interface { Message() string})
+	otherError, ok := other.(interface{ Message() string })
 	if ok {
 		return e.Message() == otherError.Message()
 	}
@@ -37,8 +37,9 @@ func (e ladaError) Message() string {
 }
 
 var (
-	IoReaderError         = ladaError{"could not read from the source", nil}
-	IoWriterError         = ladaError{"could not write to the source", nil}
-	CursorOperationError  = ladaError{"could not operate on cursor", nil}
-	CursorOutOfReachError = ladaError{"out of reach", nil}
+	IoReaderError            = ladaError{"could not read from the source", nil}
+	IoWriterError            = ladaError{"could not write to the source", nil}
+	CursorOperationError     = ladaError{"could not operate on cursor", nil}
+	InvalidIdentifierError   = ladaError{"invalid identifier name error `%s`", nil}
+	CommandPatternParseError = ladaError{"failed to parse command pattern", nil}
 )

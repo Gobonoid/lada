@@ -7,19 +7,19 @@ import (
 import "os"
 
 type Cli struct {
-	Version string
-	Name string
-	output io.Writer
+	Version     string
+	Name        string
+	output      io.Writer
 	errorOutput io.Writer
-	input io.Reader
+	input       io.Reader
 }
 
 func NewCli(name string, version string) *Cli {
 	return &Cli{
-		Name: name,
-		Version: version,
-		input: os.Stdin,
-		output: os.Stdout,
+		Name:        name,
+		Version:     version,
+		input:       os.Stdin,
+		output:      os.Stdout,
 		errorOutput: os.Stderr,
 	}
 }

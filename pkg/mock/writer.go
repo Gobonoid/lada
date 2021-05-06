@@ -28,3 +28,10 @@ func UseInvalidIoWriterMock(t *testing.T, f func(writer *os.File)) io.Writer {
 	f(file)
 	return file
 }
+
+func ReadFileAsString(file *os.File) string {
+	file.Seek(0, 0)
+	contents, _ := io.ReadAll(file)
+
+	return string(contents)
+}

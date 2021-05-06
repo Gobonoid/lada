@@ -1,11 +1,9 @@
 package lada
 
 import (
-	"errors"
 	"fmt"
 	"github.com/kodemore/lada/pkg/mock"
 	"github.com/stretchr/testify/assert"
-	"io"
 	"os"
 	"testing"
 )
@@ -18,22 +16,11 @@ func TestNewCursor(t *testing.T) {
 			assert.NotEmpty(t, cursor)
 
 			// writer should contain an escape character, when cursor is created
-			writer.Seek(0, 0)
-			contents, _ := io.ReadAll(writer)
-
-			assert.Equal(t, fmt.Sprintf(CursorNextLine, 1), string(contents))
-		})
-	})
-
-	t.Run("fails to create cursor with invalid writer", func(t *testing.T) {
-		mock.UseInvalidIoWriterMock(t, func(writer *os.File) {
-			cursor, err := NewCursor(writer)
-			assert.Empty(t, cursor)
-			assert.True(t, errors.Is(err, CursorOperationError))
+			contents := mock.ReadFileAsString(writer)
+			assert.Empty(t, contents)
 		})
 	})
 }
-
 
 func TestCursor_MoveForward(t *testing.T) {
 	t.Run("can move cursor forward", func(t *testing.T) {
@@ -41,11 +28,9 @@ func TestCursor_MoveForward(t *testing.T) {
 			cursor, _ := NewCursor(writer)
 			cursor.MoveForward(1)
 
-			writer.Seek(0, 0)
-			contents, _ := io.ReadAll(writer)
-			expected := fmt.Sprintf(CursorNextLine, 1) + fmt.Sprintf(CursorForward, 1)
-			assert.Equal(t, expected, string(contents))
-			assert.Equal(t, 2, cursor.Column())
+			contents := mock.ReadFileAsString(writer)
+			expected := fmt.Sprintf(CursorForward, 1)
+			assert.Equal(t, expected, contents)
 		})
 	})
 }
@@ -54,12 +39,35 @@ func TestCursor_MoveBackward(t *testing.T) {
 	t.Run("can move cursor forward", func(t *testing.T) {
 		mock.UseIoWriterMock(t, func(writer *os.File) {
 			cursor, _ := NewCursor(writer)
-			cursor.MoveBackward(1)
+			cursor.MoveBackward(5)
 
-			writer.Seek(0, 0)
-			contents, _ := io.ReadAll(writer)
-			expected := fmt.Sprintf(CursorNextLine, 1) + fmt.Sprintf(CursorBackward, 1)
-			assert.Equal(t, expected, string(contents))
+			contents := mock.ReadFileAsString(writer)
+			expected := fmt.Sprintf(CursorBackward, 5)
+			assert.Equal(t, expected, contents)
+		})
+	})
+
+	t.Run("cannot exceed minimum column value of 1", func(t *testing.T) {
+		mock.UseIoWriterMock(t, func(writer *os.File) {
+			cursor, _ := NewCursor(writer)
+			cursor.MoveBackward(5)
+
+			contents := mock.ReadFileAsString(writer)
+			expected := fmt.Sprintf(CursorBackward, 5)
+			assert.Equal(t, expected, contents)
+		})
+	})
+}
+
+func TestCursor_MoveUp(t *testing.T) {
+	t.Run("can move cursor up", func(t *testing.T) {
+		mock.UseIoWriterMock(t, func(writer *os.File) {
+			cursor, _ := NewCursor(writer)
+			cursor.MoveUp(2)
+
+			contents := mock.ReadFileAsString(writer)
+			expected := fmt.Sprintf(CursorUp, 2)
+			assert.Equal(t, expected, contents)
 		})
 	})
 }

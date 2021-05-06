@@ -1,7 +1,6 @@
 package lada
 
 type Widget struct {
-
 }
 
 func (w *Widget) IsDrawn() bool {
