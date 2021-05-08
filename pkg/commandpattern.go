@@ -7,22 +7,25 @@ import (
 	"strings"
 )
 
-// command $argument ...$argument-list --parameter-without-default[P]= --parameter-with-default=some\ value --flag[F]?
+// command $argument ...$argument-list --parameter-without-default[P]= --parameter-with-default=some\ value --flag[F]
 
 type Argument struct {
 	Name     string
 	Wildcard bool
+	Description string
 }
 
 type Parameter struct {
 	LongForm     string
 	ShortForm    string
 	DefaultValue string
+	Description string
 }
 
 type Flag struct {
 	LongForm  string
 	ShortForm string
+	Description string
 }
 
 type CommandPattern struct {
@@ -32,6 +35,7 @@ type CommandPattern struct {
 	parameters  []*Parameter
 	flags       []*Flag
 	arguments   []*Argument
+	Description string
 }
 
 func NewCommandPattern(pattern string) *CommandPattern {
@@ -40,6 +44,10 @@ func NewCommandPattern(pattern string) *CommandPattern {
 	}
 	command.parts = splitCommandPatternStringIntoParts(pattern)
 	return command
+}
+
+func (c *CommandPattern) Command() string {
+	return c.commandName
 }
 
 func splitCommandPatternStringIntoParts(pattern string) []string {
@@ -72,7 +80,7 @@ func splitCommandPatternStringIntoParts(pattern string) []string {
 	return result
 }
 
-var parameterNameRegex = regexp.MustCompile(`^(?P<long>[a-z][a-z-0-9]+)(?P<short>\[[a-zA-Z]\])?$`)
+var parameterNameRegex = regexp.MustCompile(`^(?P<long>[a-z][a-z-0-9-]+)(?P<short>\[([a-zA-Z])\])?$`)
 
 func matchParameterName(str string) (map[string]string, error) {
 	results := map[string]string{}
@@ -95,12 +103,12 @@ func matchParameterName(str string) (map[string]string, error) {
 func makeFlag(value string) (*Flag, error) {
 	parts, err := matchParameterName(value)
 	if err != nil {
-		return &Flag{}, InvalidIdentifierError.causedBy(err)
+		return &Flag{}, InvalidPatternIdentifierError.Sprintf(value).CausedBy(err)
 	}
 
 	flag := &Flag{LongForm: parts["long"]}
-	if short, ok := parts["short"]; ok {
-		flag.ShortForm = short
+	if short, ok := parts["short"]; ok && len(parts["short"]) > 1 {
+		flag.ShortForm = string(short[1])
 	}
 
 	return flag, nil
@@ -110,12 +118,12 @@ func makeParameter(value string) (*Parameter, error) {
 	p := strings.Split(value, "=")
 	parts, err := matchParameterName(p[0])
 	if err != nil {
-		return &Parameter{}, InvalidIdentifierError.causedBy(err)
+		return &Parameter{}, InvalidPatternIdentifierError.Sprintf(value).CausedBy(err)
 	}
 
 	parameter := &Parameter{LongForm: parts["long"]}
-	if short, ok := parts["short"]; ok {
-		parameter.ShortForm = short
+	if short, ok := parts["short"]; ok && len(parts["short"]) > 1 {
+		parameter.ShortForm = string(short[1])
 	}
 
 	if len(p) > 1 {
@@ -133,10 +141,10 @@ func (c *CommandPattern) Parse() error {
 	for _, item := range c.parts {
 		if item[0:2] == "--" {
 			// Flag
-			if item[len(item)-1] == '?' {
-				flag, err := makeFlag(item[2 : len(item)-1])
+			if !strings.ContainsRune(item, '=') {
+				flag, err := makeFlag(item[2 :])
 				if err != nil {
-					return CommandPatternParseError.causedBy(err)
+					return CommandPatternParseError.CausedBy(err)
 				}
 				c.flags = append(c.flags, flag)
 				continue
@@ -145,7 +153,7 @@ func (c *CommandPattern) Parse() error {
 			// Parameter
 			parameter, err := makeParameter(item[2:])
 			if err != nil {
-				return CommandPatternParseError.causedBy(err)
+				return CommandPatternParseError.CausedBy(err)
 			}
 			c.parameters = append(c.parameters, parameter)
 			continue
@@ -153,9 +161,9 @@ func (c *CommandPattern) Parse() error {
 
 		// arguments
 		if item[0] == '$' || (len(item) > 4 && item[0:4] == "...$") {
-			argument, err := makeArgument(item[1:])
+			argument, err := makeArgument(item)
 			if err != nil {
-				return CommandPatternParseError.causedBy(err)
+				return CommandPatternParseError.CausedBy(err)
 			}
 			c.arguments = append(c.arguments, argument)
 			continue
@@ -163,12 +171,11 @@ func (c *CommandPattern) Parse() error {
 
 		// command name
 		if c.commandName != "" {
-			return CommandPatternParseError.causedBy(
-				errors.New(fmt.Sprintf("unexpected value in the pattern `%s`", item)),
-			)
+			return CommandPatternParseError.CausedBy(UnexpectedPatternParameterError.Sprintf(item, c.raw))
+
 		}
 		if !parameterNameRegex.MatchString(item) {
-			return CommandPatternParseError.causedBy(InvalidIdentifierError)
+			return CommandPatternParseError.CausedBy(InvalidPatternIdentifierError.Sprintf(item, c.raw))
 		}
 		c.commandName = item
 	}
@@ -178,18 +185,18 @@ func (c *CommandPattern) Parse() error {
 
 func makeArgument(value string) (*Argument, error) {
 	argument := &Argument{}
-	if value[0:3] == "...$" {
-		if !parameterNameRegex.MatchString(value[3:]) {
-			return argument, CommandPatternParseError.causedBy(InvalidIdentifierError)
+	if value[0:4] == "...$" {
+		if !parameterNameRegex.MatchString(value[4:]) {
+			return argument, CommandPatternParseError.CausedBy(InvalidPatternIdentifierError.Sprintf(value))
 		}
 		argument.Wildcard = true
-		argument.Name = value[3:]
+		argument.Name = value[4:]
 		return argument, nil
 	}
 	if !parameterNameRegex.MatchString(value[1:]) {
-		return argument, CommandPatternParseError.causedBy(InvalidIdentifierError)
+		return argument, CommandPatternParseError.CausedBy(InvalidPatternIdentifierError.Sprintf(value))
 	}
 	argument.Wildcard = false
-	argument.Name = value[0:]
+	argument.Name = value[1:]
 	return argument, nil
 }

@@ -7,10 +7,10 @@ import (
 	"strings"
 )
 
-const idPattern = `[_a-z][_a-z0-9]*`
+const idPattern = `[_a-z][_a-z0-9-]*`
 const placeHolderPattern = `\s*` +
 	`(?:(?P<name>` + idPattern + `))` +
-	`(?P<filters>(\s*\\|\s*(` + idPattern + `))*)?` +
+	`(?P<filters>(\s*\|\s*(` + idPattern + `))*)?` +
 	`(?P<invalid>.*?)` +
 `\s*`
 
@@ -24,27 +24,31 @@ func escapeSequence(sequence string) string  {
 	return escaped
 }
 
-type TemplateFilters map[string]func(string) string
+type Filter func(string) string
+
+type Filters map[string]Filter
+
+type TemplateParams map[string]string
 
 type TemplateString string
 
-func (t TemplateString) SubstituteWithTag(items map[string]string, open string, close string) (string, error) {
-	return t.SubstituteWithTagAndFilters(items, open, close, make(TemplateFilters))
+func (t TemplateString) SubstituteWithTag(items TemplateParams, open string, close string) (string, error) {
+	return t.SubstituteWithTagAndFilters(items, open, close, make(Filters))
 }
 
-func (t TemplateString) Substitute(items map[string]string) (string, error) {
-	return t.SubstituteWithTagAndFilters(items, "{", "}", make(TemplateFilters))
+func (t TemplateString) Substitute(items TemplateParams) (string, error) {
+	return t.SubstituteWithTagAndFilters(items, "{", "}", make(Filters))
 }
 
-func (t TemplateString) SubstituteWithFilters(items map[string]string, filters TemplateFilters) (string, error) {
+func (t TemplateString) SubstituteWithFilters(items TemplateParams, filters Filters) (string, error) {
 	return t.SubstituteWithTagAndFilters(items, "{", "}", filters)
 }
 
 func (t TemplateString) SubstituteWithTagAndFilters(
-	items map[string]string,
+	items TemplateParams,
 	open string,
 	close string,
-	filters TemplateFilters,
+	filters Filters,
 ) (string, error) {
 
 	var err error = nil
@@ -59,8 +63,6 @@ func (t TemplateString) SubstituteWithTagAndFilters(
 		escapeSequence(close),
 	)
 
-	groupNames := pattern.SubexpNames()
-	print(groupNames)
 	for _, match := range pattern.FindAllStringSubmatch(result, -1) {
 		stringToReplace := match[0]
 		parameterName := match[1]
@@ -70,14 +72,16 @@ func (t TemplateString) SubstituteWithTagAndFilters(
 			err = errors.New(fmt.Sprintf("invalid expression `%s` in `%s`", invalid, stringToReplace))
 		}
 
-		if rawFilters != "" {
-			filters := strings.Split(rawFilters, "|")
-			for _, filter := range filters {
-
-			}
-		}
-
 		if value, ok := items[parameterName]; ok {
+			if rawFilters != "" {
+				filterNames := strings.Split(rawFilters, "|")
+				for _, filterName := range filterNames {
+					filterName = strings.TrimSpace(filterName)
+					if filter, ok := filters[filterName]; ok {
+						value = filter(value)
+					}
+				}
+			}
 			result = strings.Replace(result, stringToReplace, value, -1)
 		} else {
 			result = strings.Replace(result, stringToReplace, "", -1)

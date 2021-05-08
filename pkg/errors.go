@@ -2,29 +2,40 @@ package lada
 
 import "fmt"
 
-type ladaError struct {
+type Error struct {
 	message string
 	error
 }
 
-func (e ladaError) Error() string {
-	return fmt.Sprintf("%v : %v", e.message, e.error.Error())
+func NewError(message string) Error {
+	return Error {
+		message: message,
+	}
 }
 
-func (e ladaError) causedBy(err error) error {
+func (e Error) Error() string {
+	return fmt.Sprintf("%v : %v", e.Message(), e.error.Error())
+}
+
+func (e Error) CausedBy(err error) error {
 	e.error = err
 	return e
 }
 
-func (e ladaError) Unwrap() error {
+func (e Error) Sprintf(a ...interface{}) Error {
+	e.message = fmt.Sprintf(e.message, a)
+	return e
+}
+
+func (e Error) Unwrap() error {
 	return e.error
 }
 
-func (e ladaError) Cause() error {
+func (e Error) Cause() error {
 	return e.error
 }
 
-func (e ladaError) Is(other error) bool {
+func (e Error) Is(other error) bool {
 	otherError, ok := other.(interface{ Message() string })
 	if ok {
 		return e.Message() == otherError.Message()
@@ -32,14 +43,15 @@ func (e ladaError) Is(other error) bool {
 	return false
 }
 
-func (e ladaError) Message() string {
+func (e Error) Message() string {
 	return e.message
 }
 
 var (
-	IoReaderError            = ladaError{"could not read from the source", nil}
-	IoWriterError            = ladaError{"could not write to the source", nil}
-	CursorOperationError     = ladaError{"could not operate on cursor", nil}
-	InvalidIdentifierError   = ladaError{"invalid identifier name error `%s`", nil}
-	CommandPatternParseError = ladaError{"failed to parse command pattern", nil}
+	IoReaderError                   = NewError("could not read from the source")
+	IoWriterError                   = NewError("could not write to the source")
+	CursorOperationError            = NewError("could not operate on cursor")
+	InvalidPatternIdentifierError   = NewError("invalid identifier name `%s`")
+	UnexpectedPatternParameterError = NewError("unexpected parameter `%s` in pattern `%s`")
+	CommandPatternParseError        = NewError("failed to parse pattern `%s`")
 )
