@@ -8,7 +8,7 @@ type Error struct {
 }
 
 func NewError(message string) Error {
-	return Error {
+	return Error{
 		message: message,
 	}
 }
@@ -48,10 +48,10 @@ func (e Error) Message() string {
 }
 
 var (
-	IoReaderError                   = NewError("could not read from the source")
-	IoWriterError                   = NewError("could not write to the source")
-	CursorOperationError            = NewError("could not operate on cursor")
-	InvalidPatternIdentifierError   = NewError("invalid identifier name `%s`")
-	UnexpectedPatternParameterError = NewError("unexpected parameter `%s` in pattern `%s`")
-	CommandPatternParseError        = NewError("failed to parse pattern `%s`")
+	IoReaderError                           = NewError("could not read from the source")
+	IoWriterError                           = NewError("could not write to the source")
+	CursorOperationError                    = NewError("could not operate on cursor")
+	InvalidCommandTemplateIdentifierError   = NewError("invalid identifier name `%s` in command template")
+	UnexpectedCommandTemplateParameterError = NewError("unexpected parameter `%s` in command template `%s`")
+	CommandTemplateParseError               = NewError("failed to parse command template `%s`")
 )

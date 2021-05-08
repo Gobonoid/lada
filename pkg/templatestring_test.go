@@ -39,7 +39,7 @@ func TestTemplateString_SubstituteWithFilters(t *testing.T) {
 				return strings.ToUpper(string(s[0])) + s[1:]
 			},
 			"uclast": func(s string) string {
-				return s[0:len(s)-1] + strings.ToUpper(string(s[len(s) - 1]))
+				return s[0:len(s)-1] + strings.ToUpper(string(s[len(s)-1]))
 			},
 		}
 		parsed, err := template.SubstituteWithFilters(params, filters)

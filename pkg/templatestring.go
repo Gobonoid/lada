@@ -12,14 +12,14 @@ const placeHolderPattern = `\s*` +
 	`(?:(?P<name>` + idPattern + `))` +
 	`(?P<filters>(\s*\|\s*(` + idPattern + `))*)?` +
 	`(?P<invalid>.*?)` +
-`\s*`
+	`\s*`
 
 var charactersToEscape = []string{"[", "]", "{", "}", "*", "+", "?", "|", "^", "$", ".", "\\"}
 
-func escapeSequence(sequence string) string  {
+func escapeSequence(sequence string) string {
 	escaped := sequence
 	for _, ch := range charactersToEscape {
-		strings.Replace(escaped, ch, "\\" + ch, -1)
+		strings.Replace(escaped, ch, "\\"+ch, -1)
 	}
 	return escaped
 }
@@ -55,8 +55,8 @@ func (t TemplateString) SubstituteWithTagAndFilters(
 
 	result := string(t)
 	// match escapes and save them
-	result = strings.Replace(result, "`" + open + "`", "&#open;", -1)
-	result = strings.Replace(result, "`" + close + "`", "&#close;", -1)
+	result = strings.Replace(result, "`"+open+"`", "&#open;", -1)
+	result = strings.Replace(result, "`"+close+"`", "&#close;", -1)
 	pattern := regexp.MustCompile("(?m)" +
 		escapeSequence(open) +
 		placeHolderPattern +
