@@ -22,8 +22,8 @@ func (e Error) CausedBy(err error) error {
 	return e
 }
 
-func (e Error) Sprintf(a ...interface{}) Error {
-	e.message = fmt.Sprintf(e.message, a)
+func (e Error) New(a ...interface{}) Error {
+	e.message = fmt.Sprintf(e.message, a...)
 	return e
 }
 
@@ -48,10 +48,14 @@ func (e Error) Message() string {
 }
 
 var (
-	IoReaderError                           = NewError("could not read from the source")
-	IoWriterError                           = NewError("could not write to the source")
-	CursorOperationError                    = NewError("could not operate on cursor")
-	InvalidCommandTemplateIdentifierError   = NewError("invalid identifier name `%s` in command template")
-	UnexpectedCommandTemplateParameterError = NewError("unexpected parameter `%s` in command template `%s`")
-	CommandTemplateParseError               = NewError("failed to parse command template `%s`")
+	IoReaderError                   = NewError("could not read from the source")
+	IoWriterError                   = NewError("could not write to the source")
+	CursorOperationError            = NewError("could not operate on cursor")
+	InvalidCommandIdentifierError   = NewError("invalid identifier name `%s` in definition")
+	UnexpectedCommandParameterError = NewError("unexpected parameter `%s` in definition `%s`")
+	UnexpectedWildcardArgumentError = NewError("unexpected wildcard argument `%s` in definition `%s`")
+	CommandDefinitionParseError     = NewError("failed to parse definition `%s`")
+	CannotCreateCommandError 		= NewError("cannot create command")
+	CommandNameDoesNotMatchError	= NewError("command name `%s` does not match `%s`")
+	UnexpectedArgument				= NewError("unexpected argument `%s` in command `%s`")
 )
