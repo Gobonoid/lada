@@ -1,51 +1,11 @@
 package lada
 
+import (
+	"strings"
+)
+
 type Arguments map[string]Argument
 type Parameters map[string]Parameter
-
-func (p Parameters) GetValue(name string) (interface{}, error) {
-	return p[name].Value, nil
-}
-
-func (p Parameters) GetAsInt(name string) (int, error) {
-	return 0, nil
-}
-
-func (p Parameters) GetAsString(name string) (string, error) {
-	return "", nil
-}
-
-func (p Parameters) GetAsFloat(name string) (float32, error) {
-	return 0.0, nil
-}
-
-func (p Parameters) GetAsBool(name string) (bool, error) {
-	return false, nil
-}
-
-func (p Parameters) GetAsIntEnum(name string, enum map[string]int) (int, error) {
-	return 0, nil
-}
-
-func (p Parameters) GetAsStringEnum(name string, enum map[string]string) (string, error) {
-	return "", nil
-}
-
-func (p Parameters) GetAsStringArray(name string) ([]string, error) {
-	return make([]string, 0), nil
-}
-
-func (p Parameters) GetAsIntArray(name string) ([]int, error) {
-	return make([]int, 0), nil
-}
-
-func (p Parameters) GetAsFloatArray(name string) ([]float32, error) {
-	return make([]float32, 0), nil
-}
-
-func (p Parameters) IsEnabled(name string) (bool, error) {
-	return true, nil
-}
 
 type Handler func(args Arguments, params Parameters) error
 
@@ -84,6 +44,7 @@ func NewCommandInput(cmd string, definition *CommandDefinition) (*commandInput, 
 	cmdInput := &commandInput{
 		commandName: parts[0],
 		arguments: make(Arguments),
+		parameters: make(Parameters),
 	}
 	argIndex := 0
 	i := 1
@@ -93,13 +54,68 @@ func NewCommandInput(cmd string, definition *CommandDefinition) (*commandInput, 
 
 		// long form for parameter or flag
 		if part[0:2] == "--" {
-			
+			p := strings.Split(part[2:], "=")
+			param, ok := definition.GetParameter(p[0])
+			if !ok {
+				return &commandInput{}, UnexpectedParameterError.New(p[0], cmd)
+			}
+			if param.IsFlag && len(p) > 1 {
+				return &commandInput{}, UnexpectedFlagValueError.New(param.Name)
+			}
+
+			if param.IsFlag {
+				param.Value = "1"
+			} else {
+				param.Value = p[1]
+			}
+			cmdInput.parameters[param.Name] = param
+			i++
 			continue
 		}
-		// short form
-		if part[0] == '-' {
 
-			// check for grouping
+		// short form of parameter or flag
+		if part[0] == '-' {
+			f := part[1:]
+
+			// flag group
+			if len(f) > 1 {
+				for _, c := range f {
+					flag, ok := definition.GetParameter(string(c))
+					if !ok {
+						return &commandInput{}, UnknownParameterError.New(string(c), cmd)
+					}
+
+					if !flag.IsFlag {
+						return &commandInput{}, UnexpectedParameterError.New(string(c), cmd)
+					}
+
+					flag.Value = "1"
+					cmdInput.parameters[flag.Name] = flag
+				}
+				i++
+				continue
+			}
+
+			parameter, ok := definition.GetParameter(f)
+
+			if !ok {
+				return &commandInput{}, UnknownParameterError.New(f, cmd)
+			}
+
+			if parameter.IsFlag {
+				parameter.Value = "1"
+				cmdInput.parameters[parameter.Name] = parameter
+				i++
+				continue
+			}
+
+			if i + 1 >= iMax {
+				return &commandInput{}, MissingParameterValueError.New(f)
+			}
+
+			parameter.Value = parts[i+1]
+			cmdInput.parameters[parameter.Name] = parameter
+			i += 2
 			continue
 		}
 
@@ -111,17 +127,32 @@ func NewCommandInput(cmd string, definition *CommandDefinition) (*commandInput, 
 
 			cmdInput.arguments[arg.Name] = arg
 		} else {
-			return &commandInput{}, UnexpectedArgument.New(part, cmd)
+			return &commandInput{}, UnexpectedArgumentError.New(part, cmd)
 		}
 
 		argIndex++
 		i++
+	}
+	// add default parameters
+	for _, parameter := range definition.parameters {
+		if _, ok := cmdInput.parameters[parameter.Name]; !ok && len(parameter.DefaultValue) > 0 {
+			parameter.Value = parameter.DefaultValue
+			cmdInput.parameters[parameter.Name] = parameter
+		}
 	}
 
 	return cmdInput, nil
 }
 
 func (c *Command) Execute(cmd string) error {
+	input, err := NewCommandInput(cmd, c.Definition)
+	if err != nil {
+		return CommandError.New(cmd).CausedBy(err)
+	}
+	err = c.Handler(input.arguments, input.parameters)
+	if err != nil {
+		return CommandError.New(cmd).CausedBy(err)
+	}
 
 	return nil
 }

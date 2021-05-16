@@ -3,14 +3,20 @@ package lada
 import "fmt"
 
 type Error struct {
-	message string
+	message    string
+	originator string
 	error
 }
 
 func NewError(message string) Error {
-	return Error{
-		message: message,
+	return Error {
+		message:    message,
+		originator: message,
 	}
+}
+
+func (e Error) Originator() string {
+	return e.originator
 }
 
 func (e Error) Error() string {
@@ -36,15 +42,15 @@ func (e Error) Cause() error {
 }
 
 func (e Error) Is(other error) bool {
-	otherError, ok := other.(interface{ Message() string })
+	otherError, ok := other.(interface{ Originator() string })
 	if ok {
-		return e.Message() == otherError.Message()
+		return e.Originator() == otherError.Originator()
 	}
 	return false
 }
 
 func (e Error) Message() string {
-	return e.message
+	return e.originator
 }
 
 var (
@@ -55,7 +61,11 @@ var (
 	UnexpectedCommandParameterError = NewError("unexpected parameter `%s` in definition `%s`")
 	UnexpectedWildcardArgumentError = NewError("unexpected wildcard argument `%s` in definition `%s`")
 	CommandDefinitionParseError     = NewError("failed to parse definition `%s`")
-	CannotCreateCommandError 		= NewError("cannot create command")
-	CommandNameDoesNotMatchError	= NewError("command name `%s` does not match `%s`")
-	UnexpectedArgument				= NewError("unexpected argument `%s` in command `%s`")
+	CommandNameDoesNotMatchError    = NewError("command name `%s` does not match `%s`")
+	UnexpectedArgumentError         = NewError("unexpected argument `%s` in command `%s`")
+	UnexpectedParameterError        = NewError("unexpected parameter `%s` in command `%s`")
+	UnexpectedFlagValueError		= NewError("flags `%s` accepts no value")
+	UnknownParameterError			= NewError("unknown parameter `%s` in comamand `%s`")
+	MissingParameterValueError		= NewError("parameter `%s` expects a value to be passed")
+	CommandError					= NewError("there was an error while executing command `%s`")
 )

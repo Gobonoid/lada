@@ -29,16 +29,65 @@ func TestNewCommandInput(t *testing.T) {
 		assert.Equal(t, "Rob John Josh Smith", input.arguments["names"].Value)
 	})
 
-	t.Run("can parse catch-all and flags: hello $names* --flag-a[f] --flag-b[F]", func(t *testing.T) {
-		definition, _ := NewCommandDefinition("hello $names* --flag-a[f] --flag-b[F]")
-		input, err := NewCommandInput("hello Bob Boo John --flag-a -F", definition)
+	t.Run("can parse command with flags by full name: hello --flag-a[f] --flag-b[F]", func(t *testing.T) {
+		definition, _ := NewCommandDefinition("hello --flag-a[f] --flag-b[F]")
+		input, err := NewCommandInput("hello --flag-a --flag-b", definition)
 		assert.Nil(t, err)
 
 		assert.Equal(t, "hello", input.commandName)
-		assert.Contains(t, input.arguments, "names")
-		assert.Equal(t, "Bob Boo John", input.arguments["names"].Value)
 		assert.Contains(t, input.parameters, "flag-a")
 		assert.Contains(t, input.parameters, "flag-b")
+	})
+
+	t.Run("can parse command with grouped flags: hello --flag-a[f] --flag-b[F]", func(t *testing.T) {
+		definition, _ := NewCommandDefinition("hello --flag-a[f] --flag-b[F]")
+		input, err := NewCommandInput("hello -fF", definition)
+		assert.Nil(t, err)
+
+		assert.Equal(t, "hello", input.commandName)
+		assert.Contains(t, input.parameters, "flag-a")
+		assert.Contains(t, input.parameters, "flag-b")
+	})
+
+	t.Run("can parse parameter with values: hello --parameter= --parameter-2=", func(t *testing.T) {
+		definition, _ := NewCommandDefinition("hello --parameter= --parameter-2=")
+		input, err := NewCommandInput("hello --parameter=test --parameter-2=test\\ 2", definition)
+		assert.Nil(t, err)
+
+		assert.Equal(t, "hello", input.commandName)
+		assert.Contains(t, input.parameters, "parameter")
+		assert.Contains(t, input.parameters, "parameter-2")
+
+		assert.Equal(t, "test", input.parameters["parameter"].Value)
+		assert.Equal(t, "test 2", input.parameters["parameter-2"].Value)
+	})
+
+	t.Run("can parse short name parameter with values: hello --parameter[P]= --parameter-2[p]=", func(t *testing.T) {
+		definition, _ := NewCommandDefinition("hello --parameter[P]= --parameter-2[p]=")
+		input, err := NewCommandInput("hello -P test -p test\\ 2", definition)
+		assert.Nil(t, err)
+
+		assert.Equal(t, "hello", input.commandName)
+		assert.Contains(t, input.parameters, "parameter")
+		assert.Contains(t, input.parameters, "parameter-2")
+
+		assert.Equal(t, "test", input.parameters["parameter"].Value)
+		assert.Equal(t, "test 2", input.parameters["parameter-2"].Value)
+	})
+
+	t.Run("fails when P's value is missing: hello --parameter[P]=", func(t *testing.T) {
+		definition, _ := NewCommandDefinition("hello --parameter[P]=")
+		input, err := NewCommandInput("hello -P", definition)
+		assert.Empty(t, input)
+		assert.NotNil(t, err)
+		assert.True(t, errors.Is(err, MissingParameterValueError))
+	})
+
+	t.Run("can retrieve default value: hello --parameter[P]=default", func(t *testing.T) {
+		definition, _ := NewCommandDefinition("hello --parameter[P]=default")
+		input, err := NewCommandInput("hello", definition)
+		assert.Nil(t, err)
+		assert.Equal(t, "default", input.parameters["parameter"].Value)
 	})
 }
 
@@ -46,7 +95,7 @@ func TestNewCommand(t *testing.T) {
 	t.Run("can create: hello $name", func(t *testing.T) {
 		var result string
 		cmd, err := NewCommand("hello $name", func(args Arguments, params Parameters) error {
-			if name, ok := params["name"]; ok {
+			if name, ok := args["name"]; ok {
 				result = fmt.Sprintf("Hello %s", name.Value)
 				return nil
 			}
@@ -55,7 +104,7 @@ func TestNewCommand(t *testing.T) {
 		})
 
 		assert.Nil(t, err)
-		assert.Equal(t, 0, cmd.Execute("hello Tom"))
+		assert.Equal(t, nil, cmd.Execute("hello Tom"))
 		assert.Equal(t, "Hello Tom", result)
 	})
 }
