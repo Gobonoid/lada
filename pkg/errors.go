@@ -68,4 +68,7 @@ var (
 	UnknownParameterError			= NewError("unknown parameter `%s` in comamand `%s`")
 	MissingParameterValueError		= NewError("parameter `%s` expects a value to be passed")
 	CommandError					= NewError("there was an error while executing command `%s`")
+	CannotUseFlagAsAValueError		= NewError("cannot use flag as a value")
+	InvalidParameterValueError		= NewError("parameter `%s` has invalid value `%s`")
+	InvalidArgumentValueError		= NewError("argument `%s` has invalid value `%s`")
 )

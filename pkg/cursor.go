@@ -17,6 +17,7 @@ const CursorEraseInLine = escape + "[%dK"    // 0 to end of line, 1 to beginning
 const CursorHide = escape + "[25h"
 const CursorShow = escape + "[25l"
 const CursorSgrReset = escape + "[0m"
+const CursorResetColor = "[32m"
 
 type Cursor struct {
 	writer io.Writer
@@ -105,6 +106,13 @@ func (c *Cursor) Print(text string) error {
 	return nil
 }
 
+func (c *Cursor) Printf(text string, values ...interface{}) error {
+	if _, err := fmt.Fprintf(c.writer, text, values...); err != nil {
+		return CursorOperationError.CausedBy(err)
+	}
+	return nil
+}
+
 func (c *Cursor) EraseDisplay() error {
 	if _, err := fmt.Fprintf(c.writer, CursorEraseInDisplay, 2); err != nil {
 		return CursorOperationError.CausedBy(err)
@@ -128,6 +136,13 @@ func (c *Cursor) Close() error {
 
 func (c *Cursor) ResetStyle() error {
 	if _, err := fmt.Fprint(c.writer, CursorSgrReset); err != nil {
+		return CursorOperationError.CausedBy(err)
+	}
+	return nil
+}
+
+func (c *Cursor) ResetColor() error {
+	if _, err := fmt.Fprint(c.writer, CursorResetColor); err != nil {
 		return CursorOperationError.CausedBy(err)
 	}
 	return nil

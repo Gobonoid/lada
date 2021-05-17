@@ -7,24 +7,6 @@ import (
 	"strings"
 )
 
-// command $argument $argument-list* --parameter-without-default[P]= --parameter-with-default=some\ value --flag[F]
-
-type Argument struct {
-	Name        string
-	Wildcard    bool
-	Description string
-	Value 		string
-}
-
-type Parameter struct {
-	Name         string
-	ShortForm    string
-	DefaultValue string
-	Description  string
-	Value        string
-	IsFlag       bool
-}
-
 type CommandDefinition struct {
 	raw         string
 	parts       []string

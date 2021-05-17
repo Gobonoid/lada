@@ -107,4 +107,19 @@ func TestNewCommand(t *testing.T) {
 		assert.Equal(t, nil, cmd.Execute("hello Tom"))
 		assert.Equal(t, "Hello Tom", result)
 	})
+
+	t.Run("can retrieve params as specific type", func(t *testing.T) {
+
+		var result int
+		cmd, _ := NewCommand("test --parameter[P]= --flag[F]", func(args Arguments, params Parameters) error {
+			result, _ = params["parameter"].AsInt()
+			return nil
+		})
+
+		assert.NotEmpty(t, cmd)
+		err := cmd.Execute("test -P 10")
+		assert.Nil(t, err)
+
+		assert.Equal(t, 10, result)
+	})
 }
