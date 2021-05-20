@@ -11,7 +11,7 @@ type CommandDefinition struct {
 	raw         string
 	parts       []string
 	commandName string
-	parameters  []Parameter
+	parameters  []Option
 	arguments   []Argument
 	Description string
 }
@@ -31,7 +31,7 @@ func (c *CommandDefinition) GetArgument(position int) (Argument, bool) {
 	return c.arguments[position], true
 }
 
-func (c *CommandDefinition) GetParameter(name string) (Parameter, bool) {
+func (c *CommandDefinition) GetParameter(name string) (Option, bool) {
 	for _, p := range c.parameters {
 		if p.ShortForm == name {
 			return p, true
@@ -41,14 +41,14 @@ func (c *CommandDefinition) GetParameter(name string) (Parameter, bool) {
 			return p, true
 		}
 	}
-	return Parameter{}, false
+	return Option{}, false
 }
 
-func NewCommandDefinition(definition string) (*CommandDefinition, error) {
+func NewCommandFormat(format string) (*CommandDefinition, error) {
 	command := &CommandDefinition{
-		raw: definition,
+		raw: format,
 	}
-	command.parts = splitCommandStringToParts(definition)
+	command.parts = splitCommandFormat(format)
 	if err:= command.Parse(); err != nil {
 		return &CommandDefinition{}, err
 	}
@@ -56,9 +56,9 @@ func NewCommandDefinition(definition string) (*CommandDefinition, error) {
 	return command, nil
 }
 
-func splitCommandStringToParts(template string) []string {
+func splitCommandFormat(format string) []string {
 	result := make([]string, 0)
-	parts := strings.Split(template, " ")
+	parts := strings.Split(format, " ")
 	escaped := false
 	for _, part := range parts {
 		if part == "" {
@@ -106,13 +106,13 @@ func matchParameterName(str string) (map[string]string, error) {
 	return results, nil
 }
 
-func makeFlag(value string) (Parameter, error) {
+func makeFlag(value string) (Option, error) {
 	parts, err := matchParameterName(value)
 	if err != nil {
-		return Parameter{}, InvalidCommandIdentifierError.New(value).CausedBy(err)
+		return Option{}, InvalidCommandIdentifierError.New(value).CausedBy(err)
 	}
 
-	flag := Parameter{Name: parts["long"], IsFlag: true}
+	flag := Option{Name: parts["long"], IsFlag: true}
 	if short, ok := parts["short"]; ok && len(parts["short"]) > 1 {
 		flag.ShortForm = string(short[1])
 	}
@@ -120,14 +120,14 @@ func makeFlag(value string) (Parameter, error) {
 	return flag, nil
 }
 
-func makeParameter(value string) (Parameter, error) {
+func makeParameter(value string) (Option, error) {
 	p := strings.Split(value, "=")
 	parts, err := matchParameterName(p[0])
 	if err != nil {
-		return Parameter{}, InvalidCommandIdentifierError.New(value).CausedBy(err)
+		return Option{}, InvalidCommandIdentifierError.New(value).CausedBy(err)
 	}
 
-	parameter := Parameter{Name: parts["long"], IsFlag: false}
+	parameter := Option{Name: parts["long"], IsFlag: false}
 	if short, ok := parts["short"]; ok && len(parts["short"]) > 1 {
 		parameter.ShortForm = string(short[1])
 	}
@@ -141,7 +141,7 @@ func makeParameter(value string) (Parameter, error) {
 
 func (c *CommandDefinition) Parse() error {
 	c.arguments = make([]Argument, 0)
-	c.parameters = make([]Parameter, 0)
+	c.parameters = make([]Option, 0)
 	wildCardArgPresent := false
 
 	for _, item := range c.parts {
@@ -156,7 +156,7 @@ func (c *CommandDefinition) Parse() error {
 				continue
 			}
 
-			// Parameter
+			// Option
 			parameter, err := makeParameter(item[2:])
 			if err != nil {
 				return CommandDefinitionParseError.CausedBy(err)

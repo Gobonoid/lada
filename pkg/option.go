@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-type Parameter struct {
+type Option struct {
 	Name         string
 	ShortForm    string
 	DefaultValue string
@@ -14,7 +14,15 @@ type Parameter struct {
 	IsFlag       bool
 }
 
-func (p Parameter) AsInt() (int, error) {
+func (p Option) AsString() (string, error) {
+	if p.IsFlag {
+		return "", CannotUseFlagAsAValueError.New()
+	}
+
+	return p.Value, nil
+}
+
+func (p Option) AsInt() (int, error) {
 	if p.IsFlag {
 		return 0, CannotUseFlagAsAValueError.New()
 	}
@@ -22,7 +30,7 @@ func (p Parameter) AsInt() (int, error) {
 	return value, err
 }
 
-func (p Parameter) AsRangedInt(min int, max int) (int, error) {
+func (p Option) AsRangedInt(min int, max int) (int, error) {
 	value, err := p.AsInt()
 	if err != nil {
 		return 0, InvalidParameterValueError.New(p.Name, p.Value).CausedBy(err)
@@ -34,7 +42,7 @@ func (p Parameter) AsRangedInt(min int, max int) (int, error) {
 	return 0, InvalidParameterValueError.New(p.Name, p.Value)
 }
 
-func (p Parameter) AsBool() (bool, error) {
+func (p Option) AsBool() (bool, error) {
 	if p.IsFlag {
 		return false, CannotUseFlagAsAValueError.New()
 	}
@@ -42,7 +50,7 @@ func (p Parameter) AsBool() (bool, error) {
 	return value, err
 }
 
-func (p Parameter) AsFloat() (float64, error) {
+func (p Option) AsFloat() (float64, error) {
 	if p.IsFlag {
 		return 0, CannotUseFlagAsAValueError.New()
 	}
@@ -50,7 +58,7 @@ func (p Parameter) AsFloat() (float64, error) {
 	return value, err
 }
 
-func (p Parameter) AsRangedFloat(min float64, max float64) (float64, error) {
+func (p Option) AsRangedFloat(min float64, max float64) (float64, error) {
 	value, err := p.AsFloat()
 	if err != nil {
 		return 0, InvalidParameterValueError.New(p.Name, p.Value).CausedBy(err)
@@ -62,14 +70,14 @@ func (p Parameter) AsRangedFloat(min float64, max float64) (float64, error) {
 	return 0, InvalidParameterValueError.New(p.Name, p.Value)
 }
 
-func (p Parameter) AsStringList() ([]string, error) {
+func (p Option) AsStringList() ([]string, error) {
 	if p.IsFlag {
 		return []string{}, CannotUseFlagAsAValueError.New()
 	}
 	return strings.Split(p.Value, ","), nil
 }
 
-func (p Parameter) AsIntList() ([]int, error) {
+func (p Option) AsIntList() ([]int, error) {
 	if p.IsFlag {
 		return []int{}, CannotUseFlagAsAValueError.New()
 	}
@@ -82,7 +90,7 @@ func (p Parameter) AsIntList() ([]int, error) {
 	return result, nil
 }
 
-func (p Parameter) AsFloatList() ([]float64, error) {
+func (p Option) AsFloatList() ([]float64, error) {
 	if p.IsFlag {
 		return []float64{}, CannotUseFlagAsAValueError.New()
 	}
@@ -95,7 +103,7 @@ func (p Parameter) AsFloatList() ([]float64, error) {
 	return result, nil
 }
 
-func (p Parameter) AsIntEnum(enumMap map[string]int) (int, error) {
+func (p Option) AsIntEnum(enumMap map[string]int) (int, error) {
 	if p.IsFlag {
 		return 0, CannotUseFlagAsAValueError.New()
 	}
@@ -107,7 +115,7 @@ func (p Parameter) AsIntEnum(enumMap map[string]int) (int, error) {
 	return -1, InvalidParameterValueError.New(p.Name, p.Value)
 }
 
-func (p Parameter) AsStringEnum(enumMap map[string]string) (string, error) {
+func (p Option) AsStringEnum(enumMap map[string]string) (string, error) {
 	if p.IsFlag {
 		return "", CannotUseFlagAsAValueError.New()
 	}
@@ -119,7 +127,7 @@ func (p Parameter) AsStringEnum(enumMap map[string]string) (string, error) {
 	return "", InvalidParameterValueError.New(p.Name, p.Value)
 }
 
-func (p Parameter) IsEnabled() bool {
+func (p Option) IsEnabled() bool {
 	if p.Value == "1" {
 		return true
 	}
