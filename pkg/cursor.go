@@ -14,135 +14,95 @@ const CursorNextLine = escape + "[%dE"
 const CursorPreviousLine = escape + "[%dF"
 const CursorEraseInDisplay = escape + "[%dJ" // 0 to end of screen, 1 to beginning of screen, 2 entire screen
 const CursorEraseInLine = escape + "[%dK"    // 0 to end of line, 1 to beginning of line, 2 entire line
-const CursorHide = escape + "[25h"
-const CursorShow = escape + "[25l"
+const CursorHide = escape + "[?25l"
+const CursorShow = escape + "[?25h"
 const CursorSgrReset = escape + "[0m"
-const CursorResetColor = "[32m"
+const CursorResetColor = escape + "[32m"
 
 type Cursor struct {
 	writer io.Writer
-	style  *cursorStyle
+	hidden bool
+	style  []Style
 }
 
 func NewCursor(writer io.Writer) (*Cursor, error) {
 	return &Cursor{
 		writer: writer,
+		hidden: false,
 	}, nil
 }
 
 func (c *Cursor) MoveToNextLine() error {
-	if _, err := fmt.Fprintf(c.writer, CursorNextLine, 1); err != nil {
-		return CursorOperationError.CausedBy(err)
-	}
-	return nil
+	return c.execute(fmt.Sprintf(CursorNextLine, 1))
 }
 
 func (c *Cursor) MoveToPreviousLine() error {
-	if _, err := fmt.Fprintf(c.writer, CursorPreviousLine, 1); err != nil {
-		return CursorOperationError.CausedBy(err)
-	}
-	return nil
+	return c.execute(fmt.Sprintf(CursorPreviousLine, 1))
 }
 
 func (c *Cursor) MoveForward(n int) error {
-	if _, err := fmt.Fprintf(c.writer, CursorForward, n); err != nil {
-		return CursorOperationError.CausedBy(err)
-	}
-	return nil
+	return c.execute(fmt.Sprintf(CursorForward, n))
 }
 
 func (c *Cursor) MoveBackward(n int) error {
-	if _, err := fmt.Fprintf(c.writer, CursorBackward, n); err != nil {
-		return CursorOperationError.CausedBy(err)
-	}
-	return nil
+	return c.execute(fmt.Sprintf(CursorBackward, n))
 }
 
 func (c *Cursor) MoveUp(n int) error {
-	if _, err := fmt.Fprintf(c.writer, CursorUp, n); err != nil {
-		return CursorOperationError.CausedBy(err)
-	}
-	return nil
+	return c.execute(fmt.Sprintf(CursorUp, n))
 }
 
 func (c *Cursor) MoveDown(n int) error {
-	if _, err := fmt.Fprintf(c.writer, CursorDown, n); err != nil {
-		return CursorOperationError.CausedBy(err)
-	}
-	return nil
+	return c.execute(fmt.Sprintf(CursorDown, n))
+}
+
+func (c *Cursor) EraseDisplay() error {
+	return c.execute(fmt.Sprintf(CursorEraseInDisplay, 2))
+}
+
+func (c *Cursor) EraseLine() error {
+	return c.execute(fmt.Sprintf(CursorEraseInLine, 2))
+}
+
+func (c *Cursor) SetStyle(style ...Style) error {
+	c.style = style
+	return c.execute(escape + newSgr(c.style...).Value())
+}
+
+func (c *Cursor) ResetStyle() error {
+	return c.execute(CursorSgrReset)
+}
+
+func (c *Cursor) IsHidden() bool {
+	return c.hidden
 }
 
 func (c *Cursor) Hide() error {
-	if _, err := fmt.Fprint(c.writer, CursorHide); err != nil {
-		return CursorOperationError.CausedBy(err)
+	if err := c.execute(CursorHide); err != nil {
+		return err
 	}
+	c.hidden = false
 	return nil
 }
 
 func (c *Cursor) Show() error {
-	if _, err := fmt.Fprint(c.writer, CursorShow); err != nil {
+	if err := c.execute(CursorShow); err != nil {
+		return err
+	}
+	c.hidden = false
+	return nil
+}
+
+func (c *Cursor) execute(s string) error {
+	if _, err := fmt.Fprint(c.writer, s); err != nil {
 		return CursorOperationError.CausedBy(err)
 	}
 	return nil
 }
 
-func (c *Cursor) SetStyle(style *cursorStyle) {
-	c.style = style
-	c.applyStyle()
-}
-
-func (c *Cursor) applyStyle() error {
-	sgr := c.style.Sgr()
-	if _, err := fmt.Fprint(c.writer, sgr); err != nil {
-		return CursorOperationError.CausedBy(err)
-	}
-	return nil
-}
-
-func (c *Cursor) Print(text string) error {
-	if _, err := fmt.Fprint(c.writer, text); err != nil {
-		return CursorOperationError.CausedBy(err)
-	}
-	return nil
-}
-
-func (c *Cursor) Printf(text string, values ...interface{}) error {
-	if _, err := fmt.Fprintf(c.writer, text, values...); err != nil {
-		return CursorOperationError.CausedBy(err)
-	}
-	return nil
-}
-
-func (c *Cursor) EraseDisplay() error {
-	if _, err := fmt.Fprintf(c.writer, CursorEraseInDisplay, 2); err != nil {
-		return CursorOperationError.CausedBy(err)
-	}
-	return nil
-}
-
-func (c *Cursor) EraseLine() error {
-	if _, err := fmt.Fprintf(c.writer, CursorEraseInLine, 2); err != nil {
-		return CursorOperationError.CausedBy(err)
-	}
-	return nil
-}
-
-func (c *Cursor) Close() error {
+func (c *Cursor) close() error {
+	c.Show()
 	if _, err := fmt.Fprint(c.writer, "\n"); err != nil {
-		return CursorOperationError.CausedBy(err)
-	}
-	return nil
-}
-
-func (c *Cursor) ResetStyle() error {
-	if _, err := fmt.Fprint(c.writer, CursorSgrReset); err != nil {
-		return CursorOperationError.CausedBy(err)
-	}
-	return nil
-}
-
-func (c *Cursor) ResetColor() error {
-	if _, err := fmt.Fprint(c.writer, CursorResetColor); err != nil {
 		return CursorOperationError.CausedBy(err)
 	}
 	return nil

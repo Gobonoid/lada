@@ -12,6 +12,9 @@ type Argument struct {
 	Value 		string
 }
 
+func (a Argument) AsString() string {
+	return a.Value
+}
 
 func (a Argument) AsInt() (int, error) {
 	return strconv.Atoi(a.Value)

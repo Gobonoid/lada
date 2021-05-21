@@ -1,12 +1,24 @@
 package lada
 
-type Widget struct {
+type SelectList struct {
+	Label string
+	Items []string
+	activeItem int
+	size int
 }
 
-func (w *Widget) IsDrawn() bool {
-	return false
+func NewSelectList(label string, items []string) *SelectList {
+	l := &SelectList{
+		Label: label,
+		Items: items,
+		activeItem: 0,
+	}
+
+	return l
 }
 
-func (w *Widget) Redraw() error {
-	return nil
-}
+/*
+○
+⦿
+◌
+*/

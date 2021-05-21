@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-type CommandDefinition struct {
+type CommandFormat struct {
 	raw         string
 	parts       []string
 	commandName string
@@ -16,11 +16,11 @@ type CommandDefinition struct {
 	Description string
 }
 
-func (c *CommandDefinition) Command() string {
+func (c *CommandFormat) Command() string {
 	return c.commandName
 }
 
-func (c *CommandDefinition) GetArgument(position int) (Argument, bool) {
+func (c *CommandFormat) GetArgument(position int) (Argument, bool) {
 	if position >= len(c.arguments) {
 		if c.arguments[len(c.arguments) - 1].Wildcard {
 			return c.arguments[len(c.arguments) - 1], true
@@ -31,7 +31,7 @@ func (c *CommandDefinition) GetArgument(position int) (Argument, bool) {
 	return c.arguments[position], true
 }
 
-func (c *CommandDefinition) GetParameter(name string) (Option, bool) {
+func (c *CommandFormat) GetParameter(name string) (Option, bool) {
 	for _, p := range c.parameters {
 		if p.ShortForm == name {
 			return p, true
@@ -44,13 +44,13 @@ func (c *CommandDefinition) GetParameter(name string) (Option, bool) {
 	return Option{}, false
 }
 
-func NewCommandFormat(format string) (*CommandDefinition, error) {
-	command := &CommandDefinition{
+func NewCommandFormat(format string) (*CommandFormat, error) {
+	command := &CommandFormat{
 		raw: format,
 	}
 	command.parts = splitCommandFormat(format)
 	if err:= command.Parse(); err != nil {
-		return &CommandDefinition{}, err
+		return &CommandFormat{}, err
 	}
 
 	return command, nil
@@ -139,7 +139,7 @@ func makeParameter(value string) (Option, error) {
 	return parameter, nil
 }
 
-func (c *CommandDefinition) Parse() error {
+func (c *CommandFormat) Parse() error {
 	c.arguments = make([]Argument, 0)
 	c.parameters = make([]Option, 0)
 	wildCardArgPresent := false

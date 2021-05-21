@@ -1,8 +1,8 @@
 package lada
 
-type Color uint8
+type color uint8
 
-var colorNames = map[Color]string{
+var colors = map[color]string{
 	39: "default",
 	30: "black",
 	31: "red",
@@ -22,24 +22,24 @@ var colorNames = map[Color]string{
 	97: "white",
 }
 
-var Colors = struct {
-	DEFAULT      Color
-	BLACK        Color
-	RED          Color
-	GREEN        Color
-	YELLOW       Color
-	BLUE         Color
-	MAGENTA      Color
-	CYAN         Color
-	LIGHTGRAY    Color
-	DARKGRAY     Color
-	LIGHTRED     Color
-	LIGHTGREEN   Color
-	LIGHTYELLOW  Color
-	LIGHTBLUE    Color
-	LIGHTMAGENTA Color
-	LIGHTCYAN    Color
-	WHITE        Color
+var Color = struct {
+	DEFAULT      color
+	BLACK        color
+	RED          color
+	GREEN        color
+	YELLOW       color
+	BLUE         color
+	MAGENTA      color
+	CYAN         color
+	LIGHTGRAY    color
+	DARKGRAY     color
+	LIGHTRED     color
+	LIGHTGREEN   color
+	LIGHTYELLOW  color
+	LIGHTBLUE    color
+	LIGHTMAGENTA color
+	LIGHTCYAN    color
+	WHITE        color
 }{
 	DEFAULT:      39,
 	BLACK:        30,
@@ -60,6 +60,6 @@ var Colors = struct {
 	WHITE:        97,
 }
 
-func (f Color) Name() string {
-	return colorNames[f]
+func (c color) Name() string {
+	return colors[c]
 }

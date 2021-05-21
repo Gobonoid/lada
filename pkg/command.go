@@ -5,18 +5,18 @@ import (
 )
 
 type Arguments map[string]Argument
-type Parameters map[string]Parameter
+type Options map[string]Option
 
-type Handler func(args Arguments, params Parameters) error
+type Handler func(terminal *Terminal, arguments Arguments, options Options) error
 
 type Command struct {
 	Name       string
 	Handler    Handler
-	Definition *CommandDefinition
+	Definition *CommandFormat
 }
 
-func NewCommand(definition string, handler Handler) (*Command, error) {
-	cmdDefinition, err := NewCommandDefinition(definition)
+func NewCommand(format string, handler Handler) (*Command, error) {
+	cmdDefinition, err := NewCommandFormat(format)
 	if err != nil {
 		return &Command{}, err
 	}
@@ -32,19 +32,19 @@ func NewCommand(definition string, handler Handler) (*Command, error) {
 
 type commandInput struct {
 	commandName string
-	arguments Arguments
-	parameters Parameters
+	arguments   Arguments
+	parameters  Options
 }
 
-func NewCommandInput(cmd string, definition *CommandDefinition) (*commandInput, error) {
-	parts := splitCommandStringToParts(cmd)
+func NewCommandInput(cmd string, definition *CommandFormat) (*commandInput, error) {
+	parts := splitCommandFormat(cmd)
 	if parts[0] != definition.Command() {
 		return &commandInput{}, CommandNameDoesNotMatchError.New(parts[0], definition.Command())
 	}
 	cmdInput := &commandInput{
 		commandName: parts[0],
 		arguments: make(Arguments),
-		parameters: make(Parameters),
+		parameters: make(Options),
 	}
 	argIndex := 0
 	i := 1
@@ -53,7 +53,7 @@ func NewCommandInput(cmd string, definition *CommandDefinition) (*commandInput, 
 		part := parts[i]
 
 		// long form for parameter or flag
-		if part[0:2] == "--" {
+		if len(part) > 1 && part[0:2] == "--" {
 			p := strings.Split(part[2:], "=")
 			param, ok := definition.GetParameter(p[0])
 			if !ok {
@@ -144,12 +144,12 @@ func NewCommandInput(cmd string, definition *CommandDefinition) (*commandInput, 
 	return cmdInput, nil
 }
 
-func (c *Command) Execute(cmd string) error {
+func (c *Command) Execute(cmd string, terminal *Terminal) error {
 	input, err := NewCommandInput(cmd, c.Definition)
 	if err != nil {
 		return CommandError.New(cmd).CausedBy(err)
 	}
-	err = c.Handler(input.arguments, input.parameters)
+	err = c.Handler(terminal, input.arguments, input.parameters)
 	if err != nil {
 		return CommandError.New(cmd).CausedBy(err)
 	}

@@ -1,8 +1,13 @@
 package lada
 
+import (
+	"strconv"
+	"strings"
+)
+
 type Style interface {
 	Type() FormatType
-	Value() uint8
+	Value() int
 }
 
 type FormatType uint8
@@ -54,8 +59,8 @@ func (f format) Type() FormatType {
 	return FormatTypeFormat
 }
 
-func (f format) Value() uint8 {
-	return uint8(f)
+func (f format) Value() int {
+	return int(f)
 }
 
 type background uint8
@@ -102,8 +107,8 @@ func (b background) Type() FormatType {
 	return FormatTypeBackground
 }
 
-func (b background) Value() uint8 {
-	return uint8(b) + 10
+func (b background) Value() int {
+	return int(b) + 10
 }
 
 type foreground uint8
@@ -150,6 +155,45 @@ func (f foreground) Type() FormatType {
 	return FormatTypeForeground
 }
 
-func (f foreground) Value() uint8 {
-	return uint8(f)
+func (f foreground) Value() int {
+	return int(f)
+}
+
+type sgr struct {
+	foreground int
+	background int
+	formats []int
+}
+
+func newSgr(style ...Style) sgr {
+	result := sgr{formats: make([]int, 0)}
+	for _, item := range style {
+		switch item.Type() {
+		case FormatTypeForeground:
+			result.foreground = item.Value()
+		case FormatTypeBackground:
+			result.background = item.Value()
+		case FormatTypeFormat:
+			result.formats = append(result.formats, item.Value())
+		}
+	}
+	return result
+}
+
+func (s sgr) Value() string {
+	result := "["
+	var formats []string
+	if s.background != 0 {
+		formats = append(formats, strconv.Itoa(s.background))
+	}
+
+	if s.foreground != 0 {
+		formats = append(formats, strconv.Itoa(s.foreground))
+	}
+
+	for _, f := range s.formats {
+		formats = append(formats, strconv.Itoa(f))
+	}
+
+	return result + strings.Join(formats, ";") + "m"
 }
