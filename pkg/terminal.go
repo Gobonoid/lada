@@ -19,7 +19,6 @@ type TerminalMode int
 
 const (
 	TerminalDefaultMode TerminalMode = iota
-	TerminalInteractiveMode
 	TerminalDisabledInputMode
 )
 
@@ -40,7 +39,6 @@ type Terminal struct {
 	stashedMode   *unix.Termios
 	mode          TerminalMode
 	Cursor        *Cursor
-	keyboardEvent chan rune
 }
 
 func NewTerminal() (*Terminal, error) {
@@ -83,40 +81,28 @@ func (t *Terminal) readTermios() (*unix.Termios, error) {
 	return unix.IoctlGetTermios(int(t.ttyFd), ioctlReadTermios)
 }
 
-func (t *Terminal) StopInteractiveMode() {
-	if t.mode != TerminalInteractiveMode {
-		return
-	}
-	t.RestoreDefaultMode()
-	t.Cursor.Show()
-}
-
-func (t *Terminal) SetInteractiveMode() (<-chan rune, error) {
-	if t.mode == TerminalInteractiveMode {
-		panic("Terminal is already in interactive mode")
-	}
+func (t *Terminal) CaptureKeys(o interface{OnKey(t *Terminal, k Key) bool}) error {
 	t.Cursor.Hide()
 	termios := *t.stashedMode
 	termios.Lflag &^= unix.ECHO | unix.ECHONL | unix.ICANON
 	err := t.writeTermios(&termios)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	t.keyboardEvent = make(chan rune)
-	go func() {
-		for {
-			input, _, err := t.bstdin.ReadRune()
-			if err != nil {
-				t.StopInteractiveMode()
-				return
-			}
-			t.Println("read character:" + string(input))
-
-			t.keyboardEvent <- input
+	for {
+		b := make(Key, 4)
+		_, err := t.bstdin.Read(b)
+		if err != nil {
+			return err
 		}
-	}()
-	t.mode = TerminalInteractiveMode
-	return t.keyboardEvent, nil
+
+		if !o.OnKey(t, b) {
+			break
+		}
+	}
+	t.RestoreDefaultMode()
+	t.Cursor.Show()
+	return nil
 }
 
 func (t *Terminal) DisableInput() error {
@@ -172,11 +158,15 @@ func (t *Terminal) Secret(s string) (string, error) {
 	return string(line), nil
 }
 
-func (t *Terminal) SelectList(s string, options ...string) (int, error) {
-	t.Cursor.Hide()
-	t.RestoreDefaultMode()
-	t.Cursor.Show()
-	return 0, nil
+func (t *Terminal) SelectList(s string, options []string) (int, error) {
+	selectList := NewSelectList(s, options)
+	selectList.Display(t)
+	err := t.CaptureKeys(selectList)
+	if err != nil {
+		return 0, err
+	}
+
+	return selectList.activeItem, nil
 }
 
 

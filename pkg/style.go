@@ -32,23 +32,23 @@ var formatters = map[format]string{
 }
 
 var Format = struct {
-	BOLD      format
-	DIM       format
-	ITALIC    format
-	UNDERLINE format
-	BLINK     format
-	INVERT    format
-	HIDDEN    format
-	STRIKE    format
+	Bold      format
+	Dim       format
+	Italic    format
+	Underline format
+	Blink     format
+	Invert    format
+	Hidden    format
+	Strike    format
 }{
-	BOLD:      1,
-	DIM:       2,
-	ITALIC:    3,
-	UNDERLINE: 4,
-	BLINK:     5,
-	INVERT:    7,
-	HIDDEN:    8,
-	STRIKE:    9,
+	Bold:      1,
+	Dim:       2,
+	Italic:    3,
+	Underline: 4,
+	Blink:     5,
+	Invert:    7,
+	Hidden:    8,
+	Strike:    9,
 }
 
 func (f format) Name() string {
@@ -66,41 +66,41 @@ func (f format) Value() int {
 type background uint8
 
 var Background = struct {
-	DEFAULT      background
-	BLACK        background
-	RED          background
-	GREEN        background
-	YELLOW       background
-	BLUE         background
-	MAGENTA      background
-	CYAN         background
-	LIGHTGRAY    background
-	DARKGRAY     background
-	LIGHTRED     background
-	LIGHTGREEN   background
-	LIGHTYELLOW  background
-	LIGHTBLUE    background
-	LIGHTMAGENTA background
-	LIGHTCYAN    background
-	WHITE        background
+	Default      background
+	Black        background
+	Red          background
+	Green        background
+	Yellow       background
+	Blue         background
+	Magenta      background
+	Cyan         background
+	LightGray    background
+	DarkGray     background
+	LightRed     background
+	LightGreen   background
+	LightYellow  background
+	LightBlue    background
+	LightMagenta background
+	LightCyan    background
+	White        background
 }{
-	DEFAULT:      background(Color.DEFAULT),
-	BLACK:        background(Color.BLACK),
-	RED:          background(Color.RED),
-	GREEN:        background(Color.GREEN),
-	YELLOW:       background(Color.YELLOW),
-	BLUE:         background(Color.BLUE),
-	MAGENTA:      background(Color.MAGENTA),
-	CYAN:         background(Color.CYAN),
-	LIGHTGRAY:    background(Color.LIGHTGRAY),
-	DARKGRAY:     background(Color.DARKGRAY),
-	LIGHTRED:     background(Color.LIGHTRED),
-	LIGHTGREEN:   background(Color.LIGHTGREEN),
-	LIGHTYELLOW:  background(Color.LIGHTYELLOW),
-	LIGHTBLUE:    background(Color.LIGHTBLUE),
-	LIGHTMAGENTA: background(Color.LIGHTMAGENTA),
-	LIGHTCYAN:    background(Color.LIGHTCYAN),
-	WHITE:        background(Color.WHITE),
+	Default:      background(Color.Default),
+	Black:        background(Color.Black),
+	Red:          background(Color.Red),
+	Green:        background(Color.Green),
+	Yellow:       background(Color.Yellow),
+	Blue:         background(Color.Blue),
+	Magenta:      background(Color.Magenta),
+	Cyan:         background(Color.Cyan),
+	LightGray:    background(Color.LightGray),
+	DarkGray:     background(Color.DarkGray),
+	LightRed:     background(Color.LightRed),
+	LightGreen:   background(Color.LigthGreen),
+	LightYellow:  background(Color.LightYellow),
+	LightBlue:    background(Color.LightBlue),
+	LightMagenta: background(Color.LightMagenta),
+	LightCyan:    background(Color.LightCyan),
+	White:        background(Color.White),
 }
 
 func (b background) Type() FormatType {
@@ -114,41 +114,41 @@ func (b background) Value() int {
 type foreground uint8
 
 var Foreground = struct {
-	DEFAULT      foreground
-	BLACK        foreground
-	RED          foreground
-	GREEN        foreground
-	YELLOW       foreground
-	BLUE         foreground
-	MAGENTA      foreground
-	CYAN         foreground
-	LIGHTGRAY    foreground
-	DARKGRAY     foreground
-	LIGHTRED     foreground
-	LIGHTGREEN   foreground
-	LIGHTYELLOW  foreground
-	LIGHTBLUE    foreground
-	LIGHTMAGENTA foreground
-	LIGHTCYAN    foreground
-	WHITE        foreground
+	Default      foreground
+	Black        foreground
+	Red          foreground
+	Green        foreground
+	Yellow       foreground
+	Blue         foreground
+	Magenta      foreground
+	Cyan         foreground
+	LightGray    foreground
+	DarkGray     foreground
+	LightRed     foreground
+	LightGreen   foreground
+	LightYellow  foreground
+	LightBlue    foreground
+	LightMagenta foreground
+	LightCyan    foreground
+	White        foreground
 }{
-	DEFAULT:      foreground(Color.DEFAULT),
-	BLACK:        foreground(Color.BLACK),
-	RED:          foreground(Color.RED),
-	GREEN:        foreground(Color.GREEN),
-	YELLOW:       foreground(Color.YELLOW),
-	BLUE:         foreground(Color.BLUE),
-	MAGENTA:      foreground(Color.MAGENTA),
-	CYAN:         foreground(Color.CYAN),
-	LIGHTGRAY:    foreground(Color.LIGHTGRAY),
-	DARKGRAY:     foreground(Color.DARKGRAY),
-	LIGHTRED:     foreground(Color.LIGHTRED),
-	LIGHTGREEN:   foreground(Color.LIGHTGREEN),
-	LIGHTYELLOW:  foreground(Color.LIGHTYELLOW),
-	LIGHTBLUE:    foreground(Color.LIGHTBLUE),
-	LIGHTMAGENTA: foreground(Color.LIGHTMAGENTA),
-	LIGHTCYAN:    foreground(Color.LIGHTCYAN),
-	WHITE:        foreground(Color.WHITE),
+	Default:      foreground(Color.Default),
+	Black:        foreground(Color.Black),
+	Red:          foreground(Color.Red),
+	Green:        foreground(Color.Green),
+	Yellow:       foreground(Color.Yellow),
+	Blue:         foreground(Color.Blue),
+	Magenta:      foreground(Color.Magenta),
+	Cyan:         foreground(Color.Cyan),
+	LightGray:    foreground(Color.LightGray),
+	DarkGray:     foreground(Color.DarkGray),
+	LightRed:     foreground(Color.LightRed),
+	LightGreen:   foreground(Color.LigthGreen),
+	LightYellow:  foreground(Color.LightYellow),
+	LightBlue:    foreground(Color.LightBlue),
+	LightMagenta: foreground(Color.LightMagenta),
+	LightCyan:    foreground(Color.LightCyan),
+	White:        foreground(Color.White),
 }
 
 func (f foreground) Type() FormatType {

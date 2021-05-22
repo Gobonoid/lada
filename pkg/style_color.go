@@ -23,41 +23,41 @@ var colors = map[color]string{
 }
 
 var Color = struct {
-	DEFAULT      color
-	BLACK        color
-	RED          color
-	GREEN        color
-	YELLOW       color
-	BLUE         color
-	MAGENTA      color
-	CYAN         color
-	LIGHTGRAY    color
-	DARKGRAY     color
-	LIGHTRED     color
-	LIGHTGREEN   color
-	LIGHTYELLOW  color
-	LIGHTBLUE    color
-	LIGHTMAGENTA color
-	LIGHTCYAN    color
-	WHITE        color
+	Default      color
+	Black        color
+	Red          color
+	Green        color
+	Yellow       color
+	Blue         color
+	Magenta      color
+	Cyan         color
+	LightGray    color
+	DarkGray     color
+	LightRed     color
+	LigthGreen   color
+	LightYellow  color
+	LightBlue    color
+	LightMagenta color
+	LightCyan    color
+	White        color
 }{
-	DEFAULT:      39,
-	BLACK:        30,
-	RED:          31,
-	GREEN:        32,
-	YELLOW:       33,
-	BLUE:         34,
-	MAGENTA:      35,
-	CYAN:         36,
-	LIGHTGRAY:    37,
-	DARKGRAY:     90,
-	LIGHTRED:     91,
-	LIGHTGREEN:   92,
-	LIGHTYELLOW:  93,
-	LIGHTBLUE:    94,
-	LIGHTMAGENTA: 95,
-	LIGHTCYAN:    96,
-	WHITE:        97,
+	Default:      39,
+	Black:        30,
+	Red:          31,
+	Green:        32,
+	Yellow:       33,
+	Blue:         34,
+	Magenta:      35,
+	Cyan:         36,
+	LightGray:    37,
+	DarkGray:     90,
+	LightRed:     91,
+	LigthGreen:   92,
+	LightYellow:  93,
+	LightBlue:    94,
+	LightMagenta: 95,
+	LightCyan:    96,
+	White:        97,
 }
 
 func (c color) Name() string {

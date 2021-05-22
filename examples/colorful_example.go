@@ -6,9 +6,9 @@ func main() {
 	app, _ := l.NewApplication("simple_example", "1.0.0")
 	app.AddCommand("hello", func(t *l.Terminal, args l.Arguments, params l.Options) error {
 		t.Print("normal text")
-		t.PrettyPrint("gray on red", l.Background.RED, l.Foreground.LIGHTGRAY)
-		t.PrettyPrint("bold magenta", l.Foreground.LIGHTMAGENTA, l.Format.BOLD)
-		t.PrettyPrint("a blinking text", l.Format.BLINK)
+		t.PrettyPrint("gray on red", l.Background.Red, l.Foreground.LightGray)
+		t.PrettyPrint("bold magenta", l.Foreground.LightMagenta, l.Format.Bold)
+		t.PrettyPrint("a blinking text", l.Format.Blink)
 		return nil
 	})
 
