@@ -1,5 +1,9 @@
 package lada
 
+const slDisabledItem = "◌"
+const slActiveItem = "○"
+const slSelectedItem = "⦿"
+
 type SelectList struct {
 	Label      string
 	Items      []string
@@ -25,12 +29,12 @@ func (s *SelectList) Display(t *Terminal) {
 
 	for index, item := range s.Items {
 		if index == s.activeItem {
-			t.PrettyPrint("  ⦿ ", Foreground.LightBlue)
+			t.PrettyPrint("  " + slSelectedItem + " ", Foreground.LightBlue)
 			t.PrettyPrint(item, Foreground.LightBlue, Format.Underline)
 			t.Print("\n")
 			continue
 		}
-		t.Print("  ○ ")
+		t.Print("  " + slActiveItem + " ")
 		t.Print(item)
 		t.Print("\n")
 	}
@@ -58,9 +62,3 @@ func (s *SelectList) OnKey(t *Terminal, k Key) bool {
 	s.Refresh(t)
 	return true
 }
-
-/*
-○
-⦿
-◌
-*/
