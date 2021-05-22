@@ -158,17 +158,24 @@ func (t *Terminal) Secret(s string) (string, error) {
 	return string(line), nil
 }
 
-func (t *Terminal) SelectList(s string, options []string) (int, error) {
-	selectList := NewSelectList(s, options)
-	selectList.Display(t)
-	err := t.CaptureKeys(selectList)
-	if err != nil {
-		return 0, err
+func (t *Terminal) Display(ui UIElement) error {
+	ui.Display(t)
+	if keyboardListener, ok := ui.(UIKeyboardListener); ok {
+		err := t.CaptureKeys(keyboardListener)
+		if err != nil {
+			return err
+		}
 	}
 
-	return selectList.activeItem, nil
-}
+	if removableUi, ok := ui.(UIRemovable); ok {
+		err := removableUi.Remove(t)
+		if err != nil {
+			return err
+		}
+	}
 
+	return nil
+}
 
 func (t *Terminal) GetWindowSize() (*TerminalWindowSize, error) {
 	size, err := unix.IoctlGetWinsize(int(t.ttyFd), ioctlGetWindowSize)

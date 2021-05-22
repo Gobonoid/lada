@@ -4,7 +4,7 @@ const slDisabledItem = "◌"
 const slActiveItem = "○"
 const slSelectedItem = "⦿"
 
-type SelectList struct {
+type SelectUI struct {
 	Label      string
 	Items      []string
 	activeItem int
@@ -12,8 +12,8 @@ type SelectList struct {
 	drawn      bool
 }
 
-func NewSelectList(label string, items []string) *SelectList {
-	l := &SelectList{
+func NewSelectUI(label string, items []string) *SelectUI {
+	l := &SelectUI{
 		Label:      label,
 		Items:      items,
 		activeItem: 0,
@@ -24,7 +24,7 @@ func NewSelectList(label string, items []string) *SelectList {
 	return l
 }
 
-func (s *SelectList) Display(t *Terminal) {
+func (s *SelectUI) Display(t *Terminal) error {
 	t.Println(s.Label)
 
 	for index, item := range s.Items {
@@ -38,14 +38,24 @@ func (s *SelectList) Display(t *Terminal) {
 		t.Print(item)
 		t.Print("\n")
 	}
+
+	return nil
 }
 
-func (s *SelectList) Refresh(t *Terminal) {
+func (s *SelectUI) Value() int {
+	return s.activeItem
+}
+
+func (s *SelectUI) Remove(t *Terminal) error {
+	return nil
+}
+
+func (s *SelectUI) refresh(t *Terminal) {
 	t.Cursor.MoveUp(s.height)
 	s.Display(t)
 }
 
-func (s *SelectList) OnKey(t *Terminal, k Key) bool {
+func (s *SelectUI) OnKey(t *Terminal, k Key) bool {
 	switch k.Type() {
 	case KeyArrowUp:
 		s.activeItem--
@@ -59,6 +69,6 @@ func (s *SelectList) OnKey(t *Terminal, k Key) bool {
 	} else if s.activeItem >= len(s.Items) {
 		s.activeItem = 0
 	}
-	s.Refresh(t)
+	s.refresh(t)
 	return true
 }
