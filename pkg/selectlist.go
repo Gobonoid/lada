@@ -47,6 +47,8 @@ func (s *SelectUI) Value() int {
 }
 
 func (s *SelectUI) Remove(t *Terminal) error {
+	t.Cursor.MoveUp(s.height - 1)
+	t.Cursor.EraseLine()
 	return nil
 }
 

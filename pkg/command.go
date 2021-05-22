@@ -11,6 +11,7 @@ type Handler func(terminal *Terminal, arguments Arguments, options Options) erro
 
 type Command struct {
 	Name       string
+	Description string
 	Handler    Handler
 	Definition *CommandFormat
 }

@@ -6,8 +6,8 @@ import (
 )
 
 func main() {
-	app, _ := lada.NewApplication("input test", "1.0.0")
-	app.AddCommand("hello --name[n]=", func(t *lada.Terminal, a lada.Arguments, o lada.Options) error {
+	app, _ := lada.NewApplication("Input Test", "1.0.0")
+	app.AddCommand("input-test", "run input test", func(t *lada.Terminal, a lada.Arguments, o lada.Options) error {
 		name, _ := o["name"].AsString()
 		t.PrettyPrint(fmt.Sprintf("Hello %s", name), lada.Background.Magenta)
 		message, _ := t.Prompt("What's your name:")

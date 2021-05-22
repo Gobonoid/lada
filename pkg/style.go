@@ -197,3 +197,5 @@ func (s sgr) Value() string {
 
 	return result + strings.Join(formats, ";") + "m"
 }
+
+type StyleSheet map[string][]Style

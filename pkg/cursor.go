@@ -61,7 +61,13 @@ func (c *Cursor) EraseDisplay() error {
 }
 
 func (c *Cursor) EraseLine() error {
-	return c.execute(fmt.Sprintf(CursorEraseInLine, 2))
+	if err:= c.execute(fmt.Sprintf(CursorEraseInLine, 2)); err != nil {
+		return err
+	}
+	if err := c.execute(fmt.Sprintf(CursorPreviousLine, 0)); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (c *Cursor) SetStyle(style ...Style) error {
