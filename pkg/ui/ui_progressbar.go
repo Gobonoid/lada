@@ -1,7 +1,9 @@
-package lada
+package ui
 
 import (
 	"fmt"
+	"github.com/kodemore/lada/pkg"
+	"github.com/kodemore/lada/pkg/style"
 	"math"
 )
 
@@ -9,7 +11,7 @@ const pbBackground = "░"
 const pbBar = "█"
 const pbWidth = 30
 
-type ProgressBarUI struct {
+type ProgressBar struct {
 	Label   	string
 	total 		int
 	progress 	int
@@ -17,39 +19,39 @@ type ProgressBarUI struct {
 	update 		chan int
 }
 
-func NewProgressBarUI(label string, total int, update chan int) *ProgressBarUI {
-	pb := &ProgressBarUI{
-		Label:      label,
-		total: total,
+func NewProgressBar(label string, total int, update chan int) *ProgressBar {
+	pb := &ProgressBar{
+		Label:    label,
+		total:    total,
 		progress: 0,
-		width: pbWidth,
-		update: update,
+		width:    pbWidth,
+		update:   update,
 	}
 
 	return pb
 }
 
-func (pb *ProgressBarUI) drawBar(t *Terminal) {
+func (pb *ProgressBar) drawBar(t *lada.Terminal) {
 	done := int(math.Ceil(float64(pb.progress) / float64(pb.total) * float64(pb.width)))
 	for i := 0; i < pb.width; i++ {
 		if done >= i {
-			t.PrettyPrint(pbBar, Foreground.Green)
+			t.PrettyPrint(pbBar, style.Foreground.Green)
 			continue
 		}
-		t.PrettyPrint(pbBackground, Format.Dim)
+		t.PrettyPrint(pbBackground, style.Format.Dim)
 	}
 	if pb.progress == pb.total {
 		t.Printf(" | %d/%d", pb.progress, pb.total)
 	} else {
-		t.PrettyPrint(fmt.Sprintf(" | %d/%d ", pb.progress, pb.total), Format.Dim)
+		t.PrettyPrint(fmt.Sprintf(" | %d/%d ", pb.progress, pb.total), style.Format.Dim)
 	}
 	t.Print("\n")
 }
 
-func (pb *ProgressBarUI) Display(t *Terminal) error {
+func (pb *ProgressBar) Display(t *lada.Terminal) error {
 	t.Cursor.Hide()
 	t.DisableInput()
-	t.PrettyPrint(pb.Label, Format.Dim)
+	t.PrettyPrint(pb.Label, style.Format.Dim)
 	t.Print("\n")
 	pb.drawBar(t)
 	go func() {
@@ -72,11 +74,11 @@ func (pb *ProgressBarUI) Display(t *Terminal) error {
 	return nil
 }
 
-func (pb *ProgressBarUI) Remove(t *Terminal) error {
+func (pb *ProgressBar) Remove(t *lada.Terminal) error {
 	return nil
 }
 
-func (pb *ProgressBarUI) refresh(t *Terminal) {
+func (pb *ProgressBar) refresh(t *lada.Terminal) {
 	t.Cursor.EraseLine()
 	pb.drawBar(t)
 }

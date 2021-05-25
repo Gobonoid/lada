@@ -2,9 +2,9 @@ package lada
 
 import "strings"
 
-type PatternArguments []*Argument
+type CommandPatternArguments []*Argument
 
-func (a PatternArguments) GetArgumentByName(name string) (*Argument, bool) {
+func (a CommandPatternArguments) GetArgumentByName(name string) (*Argument, bool) {
 	for _, arg := range a {
 		if arg.Name == name {
 			return arg, true
@@ -14,7 +14,7 @@ func (a PatternArguments) GetArgumentByName(name string) (*Argument, bool) {
 	return &Argument{}, false
 }
 
-func (a PatternArguments) GetArgumentByShortName(name string) (*Argument, bool) {
+func (a CommandPatternArguments) GetArgumentByShortName(name string) (*Argument, bool) {
 	for _, arg := range a {
 		if arg.ShortName == name {
 			return arg, true
@@ -24,7 +24,7 @@ func (a PatternArguments) GetArgumentByShortName(name string) (*Argument, bool) 
 	return &Argument{}, false
 }
 
-func (a PatternArguments) GetPositionalArguments() []*Argument {
+func (a CommandPatternArguments) GetPositionalArguments() []*Argument {
 	args := make([]*Argument, 0)
 	for _, arg := range a {
 		if arg.Kind() != PositionalArgument {
@@ -36,14 +36,14 @@ func (a PatternArguments) GetPositionalArguments() []*Argument {
 	return args
 }
 
-func NewPatternArguments(s string) (PatternArguments, error) {
+func NewCommandPatternArguments(s string) (CommandPatternArguments, error) {
 	items := splitArgumentsString(s)
-	arguments := make(PatternArguments, 0)
+	arguments := make(CommandPatternArguments, 0)
 	argNames := make(map[string]struct{}, 0)
 
 	hasWildcardArgument := false
 	for _, item := range items {
-		arg, err := NewArgumentFromPattern(item)
+		arg, err := NewArgumentFromCommandPattern(item)
 		if err != nil {
 			return make([]*Argument, 0), err
 		}

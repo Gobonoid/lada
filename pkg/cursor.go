@@ -2,6 +2,7 @@ package lada
 
 import (
 	"fmt"
+	"github.com/kodemore/lada/pkg/style"
 	"io"
 )
 
@@ -22,7 +23,7 @@ const CursorResetColor = escape + "[32m"
 type Cursor struct {
 	writer io.Writer
 	hidden bool
-	style  []Style
+	style  []style.Style
 }
 
 func NewCursor(writer io.Writer) (*Cursor, error) {
@@ -70,9 +71,9 @@ func (c *Cursor) EraseLine() error {
 	return nil
 }
 
-func (c *Cursor) SetStyle(style ...Style) error {
-	c.style = style
-	return c.execute(escape + newSgr(c.style...).Value())
+func (c *Cursor) SetStyle(s ...style.Style) error {
+	c.style = s
+	return c.execute(escape + style.NewSgr(s...))
 }
 
 func (c *Cursor) ResetStyle() error {

@@ -1,14 +1,17 @@
 package main
 
-import l "github.com/kodemore/lada/pkg"
+import (
+	"github.com/kodemore/lada/pkg"
+	"github.com/kodemore/lada/pkg/style"
+)
 
 func main() {
-	app, _ := l.NewApplication("Print your messages with style", "1.0.0")
-	app.AddCommand("style", "demo of styled output", func(t *l.Terminal, args l.Arguments, params l.Options) error {
+	app, _ := lada.NewApplication("Print your messages with style", "1.0.0")
+	app.AddCommand("*", "demo of styled output", func(t *lada.Terminal, args lada.Arguments) error {
 		t.Print("normal text")
-		t.PrettyPrint("gray on red", l.Background.Red, l.Foreground.LightGray)
-		t.PrettyPrint("bold magenta", l.Foreground.LightMagenta, l.Format.Bold)
-		t.PrettyPrint("a blinking text", l.Format.Blink)
+		t.PrettyPrint("gray on red", style.Background.Red, style.Foreground.LightGray)
+		t.PrettyPrint("bold magenta", style.Foreground.LightMagenta, style.Format.Bold)
+		t.PrettyPrint("a blinking text", style.Format.Blink)
 		return nil
 	})
 

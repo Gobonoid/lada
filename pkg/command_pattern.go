@@ -5,19 +5,18 @@ import (
 )
 
 type CommandPattern struct {
-	format      string
+	raw         string
 	verb        string
-	Description string
-	Arguments   PatternArguments
+	Arguments   CommandPatternArguments
 }
 
 func NewCommandPattern(pattern string) (*CommandPattern, error) {
 	command := &CommandPattern{
-		format: pattern,
+		raw: pattern,
 	}
 	rawArgs := strings.Split(pattern, " ")
 	command.verb = rawArgs[0]
-	args, err := NewPatternArguments(strings.Join(rawArgs[1:], " "))
+	args, err := NewCommandPatternArguments(strings.Join(rawArgs[1:], " "))
 	if err != nil {
 		return &CommandPattern{}, err
 	}

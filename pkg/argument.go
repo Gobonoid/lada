@@ -1,96 +1,106 @@
 package lada
 
 import (
-	"strconv"
+	"regexp"
 	"strings"
 )
 
+type ArgumentKind int
+
+const (
+	PositionalArgument ArgumentKind = iota
+	OptionalArgument
+	FlagArgument
+)
+
+var argumentNamePattern = regexp.MustCompile(`^(?P<long>[a-zA-Z][a-zA-Z0-9-]+)(?P<short>\[([a-zA-Z])\])?$`)
+
+func parseArgumentName(str string) (map[string]string, error) {
+	results := map[string]string{}
+	match := argumentNamePattern.FindStringSubmatch(str)
+	if match == nil {
+		return results, InvalidArgumentNameError.New(str)
+	}
+
+	for i, name := range match {
+		results[argumentNamePattern.SubexpNames()[i]] = name
+	}
+	return results, nil
+}
+
 type Argument struct {
-	Name        string
-	Wildcard    bool
-	Description string
-	Value 		string
+	Name         string
+	Description  string
+	ShortName    string
+	wildcard     bool
+	defaultValue string
+	kind         ArgumentKind
 }
 
-func (a Argument) AsString() string {
-	return a.Value
-}
+func NewArgumentFromCommandPattern(p string) (*Argument, error) {
+	// --option[O]=default value
+	// argument...
+	// --option[O]
+	arg := &Argument{}
 
-func (a Argument) AsInt() (int, error) {
-	return strconv.Atoi(a.Value)
-}
-
-func (a Argument) AsRangedInt(min int, max int) (int, error) {
-	value, err := a.AsInt()
+	if len(p) > 2 && p[0:2] == "--" {
+		p = p[2:]
+		kv := strings.Split(p, "=")
+		argName, err := parseArgumentName(kv[0])
+		if err != nil {
+			return &Argument{}, err
+		}
+		arg.Name = argName["long"]
+		if argName["short"] != "" {
+			shortName := argName["short"][1:len(argName["short"])-1]
+			arg.ShortName = shortName
+		}
+		if len(kv) > 1 {
+			arg.kind = OptionalArgument
+			arg.defaultValue = kv[1]
+		} else {
+			arg.kind = FlagArgument
+		}
+		return arg, nil
+	}
+	if len(p) > 3 && p[len(p) - 3:] == "..." {
+		arg.wildcard = true
+		p = p[0:len(p) - 3]
+	}
+	argName, err := parseArgumentName(p)
 	if err != nil {
-		return 0, InvalidArgumentValueError.New(a.Name, a.Value).CausedBy(err)
+		return &Argument{}, err
 	}
+	arg.Name = argName["long"]
+	arg.kind = PositionalArgument
 
-	if min <= value && value <= max {
-		return value, nil
-	}
-	return 0, InvalidArgumentValueError.New(a.Name, a.Value)
+	return arg, nil
 }
 
-func (a Argument) AsBool() (bool, error) {
-	return strconv.ParseBool(a.Value)
+func (a *Argument) Kind() ArgumentKind {
+	return a.kind
 }
 
-func (a Argument) AsFloat() (float64, error) {
-	return strconv.ParseFloat(a.Value, 64)
+func (a *Argument) DefaultValue() string {
+	if a.kind == FlagArgument {
+		return "0"
+	}
+
+	return a.defaultValue
 }
 
-func (a Argument) AsRangedFloat(min float64, max float64) (float64, error) {
-	value, err := a.AsFloat()
-	if err != nil {
-		return 0, InvalidArgumentValueError.New(a.Name, a.Value).CausedBy(err)
+func (a *Argument) IsWildcard() bool {
+	if a.kind == PositionalArgument {
+		return a.wildcard
 	}
 
-	if min <= value && value <= max {
-		return value, nil
-	}
-	return 0, InvalidArgumentValueError.New(a.Name, a.Value)
+	return false
 }
 
-func (a Argument) AsStringList() []string {
-	if !a.Wildcard {
-		return strings.Split(a.Value, ",")
-	}
-	return strings.Split(a.Value, " ")
-}
-
-func (a Argument) AsIntList() ([]int, error) {
-	var result []int
-	for _, item := range a.AsStringList() {
-		value, _ := strconv.Atoi(item)
-		result = append(result, value)
+func (a *Argument) IsOptional() bool {
+	if a.kind == PositionalArgument {
+		return false
 	}
 
-	return result, nil
-}
-
-func (a Argument) AsFloatList() ([]float64, error) {
-	var result []float64
-	for _, item := range a.AsStringList() {
-		value, _ := strconv.ParseFloat(item, 64)
-		result = append(result, value)
-	}
-
-	return result, nil
-}
-
-func (a Argument) AsIntEnum(enumMap map[string]int) (int, error) {
-	if value, ok := enumMap[a.Value]; ok {
-		return value, nil
-	}
-
-	return -1, InvalidArgumentValueError.New(a.Name, a.Value)
-}
-
-func (a Argument) AsStringEnum(enumMap map[string]string) (string, error) {
-	if value, ok := enumMap[a.Value]; ok {
-		return value, nil
-	}
-
-	return "", InvalidArgumentValueError.New(a.Name, a.Value)
+	return true
 }

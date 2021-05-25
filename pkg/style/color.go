@@ -1,4 +1,4 @@
-package lada
+package style
 
 type color uint8
 

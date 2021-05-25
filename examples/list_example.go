@@ -1,14 +1,17 @@
 package main
 
-import l "github.com/kodemore/lada/pkg"
+import (
+	"github.com/kodemore/lada/pkg"
+	"github.com/kodemore/lada/pkg/ui"
+)
 
 func main() {
-	app, _ := l.NewApplication("Simple Application", "1.0.0")
+	app, _ := lada.NewApplication("Simple Application", "1.0.0")
 	app.Description = "This application showcases how select list works"
 
-	app.AddCommand("list-demo", "runs list demo", func(t *l.Terminal, args l.Arguments, params l.Options) error {
+	app.AddCommand("list-demo", "runs list demo", func(t *lada.Terminal, args lada.Arguments, params lada.Options) error {
 		items := []string{"item 1", "item 2", "item 3", "exit"}
-		list := l.NewSelectUI("Pick an Item", items)
+		list := ui.NewSelect("Pick an Item", items)
 		for {
 			t.Display(list)
 			t.Printf("You have selected item: %s \n", items[list.Value()])

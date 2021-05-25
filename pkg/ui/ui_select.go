@@ -1,10 +1,15 @@
-package lada
+package ui
+
+import (
+	"github.com/kodemore/lada/pkg"
+	"github.com/kodemore/lada/pkg/style"
+)
 
 const slDisabledItem = "◌"
 const slActiveItem = "○"
 const slSelectedItem = "⦿"
 
-type SelectUI struct {
+type Select struct {
 	Label      string
 	Items      []string
 	activeItem int
@@ -12,8 +17,8 @@ type SelectUI struct {
 	drawn      bool
 }
 
-func NewSelectUI(label string, items []string) *SelectUI {
-	l := &SelectUI{
+func NewSelect(label string, items []string) *Select {
+	l := &Select{
 		Label:      label,
 		Items:      items,
 		activeItem: 0,
@@ -24,13 +29,13 @@ func NewSelectUI(label string, items []string) *SelectUI {
 	return l
 }
 
-func (s *SelectUI) Display(t *Terminal) error {
+func (s *Select) Display(t *lada.Terminal) error {
 	t.Println(s.Label)
 
 	for index, item := range s.Items {
 		if index == s.activeItem {
-			t.PrettyPrint("  " + slSelectedItem + " ", Foreground.LightBlue)
-			t.PrettyPrint(item, Foreground.LightBlue, Format.Underline)
+			t.PrettyPrint("  " +slSelectedItem+ " ", style.Foreground.LightBlue)
+			t.PrettyPrint(item, style.Foreground.LightBlue, style.Format.Underline)
 			t.Print("\n")
 			continue
 		}
@@ -42,28 +47,28 @@ func (s *SelectUI) Display(t *Terminal) error {
 	return nil
 }
 
-func (s *SelectUI) Value() int {
+func (s *Select) Value() int {
 	return s.activeItem
 }
 
-func (s *SelectUI) Remove(t *Terminal) error {
+func (s *Select) Remove(t *lada.Terminal) error {
 	t.Cursor.MoveUp(s.height - 1)
 	t.Cursor.EraseLine()
 	return nil
 }
 
-func (s *SelectUI) refresh(t *Terminal) {
+func (s *Select) refresh(t *lada.Terminal) {
 	t.Cursor.MoveUp(s.height)
 	s.Display(t)
 }
 
-func (s *SelectUI) OnKey(t *Terminal, k Key) bool {
+func (s *Select) OnKey(t *lada.Terminal, k lada.Key) bool {
 	switch k.Type() {
-	case KeyArrowUp:
+	case lada.KeyArrowUp:
 		s.activeItem--
-	case KeyArrowDown:
+	case lada.KeyArrowDown:
 		s.activeItem++
-	case KeyEnter:
+	case lada.KeyEnter:
 		return false
 	}
 	if s.activeItem < 0 {

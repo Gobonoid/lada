@@ -3,6 +3,7 @@ package lada
 import (
 	"bufio"
 	"fmt"
+	"github.com/kodemore/lada/pkg/style"
 	"golang.org/x/sys/unix"
 	"io"
 	"os"
@@ -213,7 +214,7 @@ func (t *Terminal) Printf(format string, params ...interface{}) error {
 	return nil
 }
 
-func (t *Terminal) PrettyPrint(s string, style ...Style) error {
+func (t *Terminal) PrettyPrint(s string, style ...style.Style) error {
 	err := t.Cursor.SetStyle(style...)
 	if err != nil {
 		return err

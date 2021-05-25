@@ -5,44 +5,44 @@ import (
 	"strings"
 )
 
-type InputArguments struct {
+type Arguments struct {
 	raw       string
 	arguments CommandPatternArguments
 	values    []ArgumentValue
 }
 
-func (a *InputArguments) Get(s string) (ArgumentValue, bool) {
+func (a *Arguments) Get(s string) ArgumentValue {
 	for _, arg := range a.values {
 		if arg.argument.Name == s {
-			return arg, true
+			return arg
 		}
 	}
 
 	for _, arg := range a.arguments {
 		if arg.Name == s {
-			return ArgumentValue{arg, ""}, true
+			return ArgumentValue{arg, ""}
 		}
 	}
 
-	return ArgumentValue{}, false
+	panic(fmt.Sprintf("Trying to reach non-existent argument %s", s))
 }
 
-func NewInputArguments(s string, arguments CommandPatternArguments) (InputArguments, error) {
-	args := InputArguments{
+func NewArguments(s string, arguments CommandPatternArguments) (Arguments, error) {
+	args := Arguments{
 		raw: s,
 		arguments: arguments,
 		values: make([]ArgumentValue, 0),
 	}
 	err := args.parse()
 	if err != nil {
-		return InputArguments{}, err
+		return Arguments{}, err
 	}
 
 	return args, nil
 }
 
 
-func (a *InputArguments) parse() error {
+func (a *Arguments) parse() error {
 	var wildcardArg ArgumentValue
 	positionalArguments := a.arguments.GetPositionalArguments()
 	parts := splitArgumentsString(a.raw)
