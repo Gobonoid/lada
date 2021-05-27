@@ -20,7 +20,10 @@ func (e Error) Originator() string {
 }
 
 func (e Error) Error() string {
-	return fmt.Sprintf("%v : %v", e.Message(), e.error.Error())
+	if e.error != nil {
+		return fmt.Sprintf("%s : %s", e.message, e.error.Error())
+	}
+	return e.message
 }
 
 func (e Error) CausedBy(err error) error {
@@ -65,6 +68,6 @@ var (
 	UnexpectedArgumentValue			= NewError("argument `%s` expects no value")
 	InvalidArgumentValueError		= NewError("argument `%s` has invalid value `%s`")
 	ArgumentAlreadyDefinedError		= NewError("argument `%s` is already defined in the raw `%s`")
-	InvalidArgumentNameError		= NewError("argument's name `%s` does not conform pattern `([a-zA-Z][a-zA-Z0-9-]+)`")
+	InvalidArgumentNameError		= NewError("invalid argument's name `%s`")
 	CommandError					= NewError("there was an error while executing command `%s`")
 )

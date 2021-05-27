@@ -32,9 +32,9 @@ type TerminalWindowSize struct {
 
 type Terminal struct {
 	bstdin        *bufio.Reader
-	bstdout       *bufio.Writer
 	stdin         io.Reader
 	stdout        io.Writer
+	stderr		  io.Writer
 	ttyPath       string
 	ttyFd         uintptr
 	stashedMode   *unix.Termios
@@ -59,13 +59,14 @@ func NewTerminal() (*Terminal, error) {
 		return &Terminal{}, err
 	}
 
+	term.stderr = os.Stderr
+
 	term.stashedMode, err = term.readTermios()
 	if err != nil {
 		return &Terminal{}, err
 	}
 
 	term.bstdin = bufio.NewReader(term.stdin)
-	term.bstdout = bufio.NewWriter(term.stdout)
 	term.Cursor, err = NewCursor(term.stdout)
 	if err != nil {
 		return &Terminal{}, err
@@ -208,6 +209,23 @@ func (t *Terminal) Println(s string) error {
 
 func (t *Terminal) Printf(format string, params ...interface{}) error {
 	_, err := fmt.Fprintf(t.stdout, format, params...)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (t *Terminal) PrintError(s string) error {
+	err := t.Cursor.SetStyle(style.Foreground.Red)
+	if err != nil {
+		return err
+	}
+	_, err = fmt.Fprint(t.stderr, s)
+
+	if err != nil {
+		return err
+	}
+	err = t.Cursor.ResetStyle()
 	if err != nil {
 		return err
 	}

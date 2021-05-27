@@ -8,6 +8,10 @@ type Command struct {
 	Description string
 }
 
+func  (c *Command) IsHelpAvailable() bool {
+	return c.Description != ""
+}
+
 func (c *Command) Verb() string {
 	return c.Pattern.Verb()
 }
@@ -29,7 +33,7 @@ func NewCommand(pattern string, handler Handler) (*Command, error) {
 func (c *Command) Execute(args string, terminal *Terminal) error {
 	input, err := NewArguments(args, c.Pattern.Arguments)
 	if err != nil {
-		return CommandError.New(c.Pattern.raw).CausedBy(err)
+		return err
 	}
 	err = c.Handler(terminal, input)
 	if err != nil {

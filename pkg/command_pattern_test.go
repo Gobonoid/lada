@@ -7,21 +7,21 @@ import (
 
 func TestNewCommandFormat(t *testing.T) {
 	t.Run("can parse command with single argument", func(t *testing.T) {
-		cmd, err := NewCommandPattern("verb arg1")
+		cmd, err := NewCommandPattern("verb $arg1")
 		assert.Nil(t, err)
 		assert.Equal(t, "verb", cmd.Verb())
 		assert.Contains(t, cmd.Arguments, &Argument{Name: "arg1", wildcard: false})
 	})
 
 	t.Run("can parse command with single wildcard argument", func(t *testing.T) {
-		cmd, err := NewCommandPattern("verb arg1...")
+		cmd, err := NewCommandPattern("verb $arg1...")
 		assert.Nil(t, err)
 		assert.Equal(t, "verb", cmd.Verb())
 		assert.Contains(t, cmd.Arguments, &Argument{Name: "arg1", wildcard: true})
 	})
 
 	t.Run("can parse command with multiple arguments", func(t *testing.T) {
-		cmd, err := NewCommandPattern("verb arg1 arg2 arg3")
+		cmd, err := NewCommandPattern("verb $arg1 $arg2 $arg3")
 		assert.Nil(t, err)
 		assert.Equal(t, "verb", cmd.Verb())
 		assert.Contains(t, cmd.Arguments, &Argument{Name: "arg1", wildcard: false})
@@ -30,7 +30,7 @@ func TestNewCommandFormat(t *testing.T) {
 	})
 
 	t.Run("can parse command with multiple arguments and wildcard", func(t *testing.T) {
-		cmd, err := NewCommandPattern("verb arg1 argN...")
+		cmd, err := NewCommandPattern("verb $arg1 $argN...")
 		assert.Nil(t, err)
 		assert.Equal(t, "verb", cmd.Verb())
 		assert.Contains(t, cmd.Arguments, &Argument{Name: "arg1", wildcard: false})
@@ -38,7 +38,7 @@ func TestNewCommandFormat(t *testing.T) {
 	})
 
 	t.Run("can parse command with multiple arguments and options", func(t *testing.T) {
-		cmd, err := NewCommandPattern("verb arg1 argN... --option[o]=")
+		cmd, err := NewCommandPattern("verb $arg1 $argN... --option[o]=")
 		assert.Nil(t, err)
 		assert.Equal(t, "verb", cmd.Verb())
 		assert.Contains(t, cmd.Arguments, &Argument{Name: "arg1", wildcard: false})
@@ -47,7 +47,7 @@ func TestNewCommandFormat(t *testing.T) {
 	})
 
 	t.Run("can parse command with multiple arguments and multiple options", func(t *testing.T) {
-		cmd, err := NewCommandPattern("verb arg1 argN... --option[o]= --option2[O]=")
+		cmd, err := NewCommandPattern("verb $arg1 $argN... --option[o]= --option2[O]=")
 		assert.Nil(t, err)
 		assert.Equal(t, "verb", cmd.Verb())
 		assert.Contains(t, cmd.Arguments, &Argument{Name: "arg1", wildcard: false})
@@ -57,7 +57,7 @@ func TestNewCommandFormat(t *testing.T) {
 	})
 
 	t.Run("can parse command with multiple spaces", func(t *testing.T) {
-		cmd, err := NewCommandPattern("verb  arg1 \n  argN... --option[o]=   --option2[O]=   ")
+		cmd, err := NewCommandPattern("verb  $arg1 \n  $argN... --option[o]=   --option2[O]=   ")
 		assert.Nil(t, err)
 		assert.Equal(t, "verb", cmd.Verb())
 		assert.Contains(t, cmd.Arguments, &Argument{Name: "arg1", wildcard: false})

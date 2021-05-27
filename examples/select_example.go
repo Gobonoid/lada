@@ -7,9 +7,9 @@ import (
 
 func main() {
 	app, _ := lada.NewApplication("Simple Application", "1.0.0")
-	app.Description = "This application showcases how select list works"
+	app.Description = "This application showcases how select ui component works"
 
-	app.AddCommand("list-demo", "runs list demo", func(t *lada.Terminal, args lada.Arguments, params lada.Options) error {
+	app.AddCommand("select", func(t *lada.Terminal, _ lada.Arguments) error {
 		items := []string{"item 1", "item 2", "item 3", "exit"}
 		list := ui.NewSelect("Pick an Item", items)
 		for {

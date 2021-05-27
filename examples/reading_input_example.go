@@ -1,21 +1,16 @@
 package main
 
 import (
-	"fmt"
-	lada "github.com/kodemore/lada/pkg"
-	"github.com/kodemore/lada/pkg/style"
+	"github.com/kodemore/lada/pkg"
 )
 
 func main() {
 	app, _ := lada.NewApplication("Input Test", "1.0.0")
-	app.AddCommand("input-test", "run input test", func(t *lada.Terminal, a lada.Arguments, o lada.Options) error {
-		name, _ := o["name"].AsString()
-		t.PrettyPrint(fmt.Sprintf("Hello %s", name), style.Background.Magenta)
+	app.AddCommand("input", func(t *lada.Terminal, _ lada.Arguments) error {
 		message, _ := t.Prompt("What's your name:")
 		secret, _ := t.Secret("Tell me your secret")
 		t.Printf("Your name is: %s", message)
 		t.Printf("Your secret is: %s", secret)
-
 		return nil
 	})
 	app.Run()

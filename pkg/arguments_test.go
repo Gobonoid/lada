@@ -7,7 +7,7 @@ import (
 
 func TestNewInputArguments(t *testing.T) {
 	t.Run("test positional arguments", func(t *testing.T) {
-		allArgs, _ := NewCommandPatternArguments("arg1 argN")
+		allArgs, _ := NewCommandPatternArguments("$arg1 $argN")
 		args, err := NewArguments("value1 value2", allArgs)
 
 		assert.Nil(t, err)
@@ -18,7 +18,7 @@ func TestNewInputArguments(t *testing.T) {
 	})
 
 	t.Run("test missing positional arguments", func(t *testing.T) {
-		allArgs, _ := NewCommandPatternArguments("arg1 argN")
+		allArgs, _ := NewCommandPatternArguments("$arg1 $argN")
 		args, err := NewArguments("value1", allArgs)
 
 		assert.NotNil(t, err)
@@ -26,7 +26,7 @@ func TestNewInputArguments(t *testing.T) {
 	})
 
 	t.Run("test wildcard argument", func(t *testing.T) {
-		allArgs, _ := NewCommandPatternArguments("arg...")
+		allArgs, _ := NewCommandPatternArguments("$arg...")
 		args, err := NewArguments("value1 value2 value3 value4 value5", allArgs)
 
 		assert.Nil(t, err)
@@ -34,7 +34,7 @@ func TestNewInputArguments(t *testing.T) {
 	})
 
 	t.Run("test arguments with wildcard argument", func(t *testing.T) {
-		allArgs, _ := NewCommandPatternArguments("arg1 arg2 argN...")
+		allArgs, _ := NewCommandPatternArguments("$arg1 $arg2 $argN...")
 		args, err := NewArguments("value1 value2 value3 value4 value5", allArgs)
 		assert.Nil(t, err)
 
@@ -50,7 +50,7 @@ func TestNewInputArguments(t *testing.T) {
 	})
 
 	t.Run("test optional argument + wildcard", func(t *testing.T) {
-		allArgs, _ := NewCommandPatternArguments("arg... --optional=")
+		allArgs, _ := NewCommandPatternArguments("$arg... --optional=")
 		args, err := NewArguments("--optional=123 1 2 3 4", allArgs)
 		assert.Nil(t, err)
 

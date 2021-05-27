@@ -7,7 +7,7 @@ import (
 
 func TestNewArgumentFromFormat(t *testing.T) {
 	t.Run("can parse positional argument", func(t *testing.T) {
-		arg, err := NewArgumentFromCommandPattern("test")
+		arg, err := NewArgumentFromCommandPattern("$test")
 		assert.Nil(t, err)
 		assert.Equal(t, "test", arg.Name)
 		assert.Empty(t, arg.ShortName)
@@ -15,7 +15,7 @@ func TestNewArgumentFromFormat(t *testing.T) {
 		assert.Equal(t, PositionalArgument, arg.kind)
 	})
 	t.Run("can parse wildcard argument", func(t *testing.T) {
-		arg, err := NewArgumentFromCommandPattern("test...")
+		arg, err := NewArgumentFromCommandPattern("$test...")
 		assert.Nil(t, err)
 		assert.Equal(t, "test", arg.Name)
 		assert.Empty(t, arg.ShortName)

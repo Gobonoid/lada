@@ -5,6 +5,8 @@ import (
 	"strings"
 )
 
+type ArgumentsHelp map[string]string
+
 type ArgumentKind int
 
 const (
@@ -67,7 +69,12 @@ func NewArgumentFromCommandPattern(p string) (*Argument, error) {
 		arg.wildcard = true
 		p = p[0:len(p) - 3]
 	}
-	argName, err := parseArgumentName(p)
+
+	// positional arguments must start with $ sign
+	if p[0] != '$' {
+		return &Argument{}, InvalidArgumentNameError.New(p)
+	}
+	argName, err := parseArgumentName(p[1:])
 	if err != nil {
 		return &Argument{}, err
 	}
@@ -98,9 +105,9 @@ func (a *Argument) IsWildcard() bool {
 }
 
 func (a *Argument) IsOptional() bool {
-	if a.kind == PositionalArgument {
-		return false
-	}
+	return !a.IsPositional()
+}
 
-	return true
+func (a *Argument) IsPositional() bool {
+	return a.kind == PositionalArgument
 }

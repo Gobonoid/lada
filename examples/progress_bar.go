@@ -1,15 +1,15 @@
 package main
 
 import (
-	l "github.com/kodemore/lada/pkg"
+	"github.com/kodemore/lada/pkg"
 	"github.com/kodemore/lada/pkg/ui"
 	"time"
 )
 
 func main() {
-	app, _ := l.NewApplication("Progress Bar Application", "1.0.0")
+	app, _ := lada.NewApplication("Progress Bar Application", "1.0.0")
 	app.Description = "This application showcases how progress bar works"
-	app.AddCommand("progress-demo", "runs progress bar demo", func(t *l.Terminal, args l.Arguments, params l.Options) error {
+	app.AddCommand("progressbar", func(t *lada.Terminal, _ lada.Arguments) error {
 
 		total := 20
 		updateProgressBar := make(chan int)

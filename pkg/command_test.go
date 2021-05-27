@@ -9,7 +9,7 @@ import (
 func TestNewCommand(t *testing.T) {
 	t.Run("can create: hello $name", func(t *testing.T) {
 		var result string
-		cmd, err := NewCommand("hello name", func(terminal *Terminal, args Arguments) error {
+		cmd, err := NewCommand("hello $name", func(terminal *Terminal, args Arguments) error {
 			result = fmt.Sprintf("Hello %s", args.Get("name").Value())
 			return nil
 		})
